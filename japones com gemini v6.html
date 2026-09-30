@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japonês com ChatGPT — V6</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
+button{font:inherit;cursor:pointer}
+.app{min-height:100vh;display:flex}
+.sidebar{width:250px;background:#111827;border-right:1px solid #273244;padding:22px 16px;position:fixed;top:0;bottom:0;overflow-y:auto}
+.logo{font-size:21px;font-weight:800;margin-bottom:5px}.sub{color:#9ca3af;font-size:12px;margin-bottom:25px}
+.nav button{width:100%;border:0;background:transparent;color:#cbd5e1;text-align:left;padding:12px;border-radius:10px;margin:3px 0;display:block}
+.nav button:hover,.nav button.active{background:#1f2937;color:#fff}
+.main{margin-left:250px;width:calc(100% - 250px);padding:35px;max-width:1250px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:28px}
+h1{font-size:30px;margin:0 0 5px}.muted{color:#9ca3af}
+.progressBox{min-width:220px}.progress{height:9px;background:#1f2937;border-radius:99px;overflow:hidden}.bar{height:100%;background:#22c55e;width:0%;transition:.3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:#151c27;border:1px solid #293548;border-radius:16px;padding:20px;box-shadow:0 8px 30px #0002}
+.card h2,.card h3{margin-top:0}.tag{display:inline-block;padding:5px 9px;border-radius:99px;background:#1d4ed8;color:white;font-size:12px;margin-bottom:12px}
+.lesson{display:none}.lesson.active{display:block}
+.hero{background:linear-gradient(135deg,#172033,#111827);padding:28px;border-radius:18px;border:1px solid #334155;margin-bottom:18px}
+.hero h2{font-size:26px;margin:0 0 8px}
+.btn{border:0;border-radius:10px;padding:11px 16px;background:#2563eb;color:#fff;font-weight:700}
+.btn:hover{filter:brightness(1.1)}.btn.secondary{background:#374151}.btn.green{background:#16a34a}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.kana{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:15px}
+.kanaBox{background:#111827;border:1px solid #334155;border-radius:12px;text-align:center;padding:12px;position:relative;cursor:pointer;transition:transform 0.1s}
+.kanaBox:hover{transform:scale(1.03);border-color:#60a5fa}
+.kanaBox .jp{font-size:32px;font-weight:700}.kanaBox .romaji{font-size:13px;color:#9ca3af;margin-top:2px}
+.kanaBox .status-btn{position:absolute;top:5px;right:5px;background:none;border:none;font-size:12px;padding:0;cursor:pointer}
+.example{font-size:24px;text-align:center;padding:20px;background:#0f172a;border-radius:12px;margin:15px 0}
+.jpbig{font-size:36px;font-weight:800}.romajiBig{color:#60a5fa;margin-top:5px}.translation{color:#cbd5e1;margin-top:8px}
+.question{margin:20px 0;padding:18px;background:#101722;border:1px solid #2c3a4e;border-radius:14px}
+.q-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:16px;margin-bottom:8px}
+.options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.option{background:#1f2937;color:#fff;border:1px solid #374151;padding:11px;border-radius:10px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+.option:hover{background:#263449}.option.correct{background:#166534;border-color:#22c55e}.option.wrong{background:#7f1d1d;border-color:#ef4444}
+.optionText{font-size:20px;font-weight:700}.miniAudio{border:1px solid #64748b;background:#111827;color:#cbd5e1;border-radius:8px;padding:6px 9px;font-size:14px}.miniAudio:hover{background:#334155}
+.feedback{margin-top:12px;min-height:22px;font-weight:700}
+.stat{font-size:30px;font-weight:800}.small{font-size:13px;color:#94a3b8}
+.word{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #273244}.word:last-child{border-bottom:0}
+.audioBtn{background:#1e293b;border:1px solid #475569;color:#f8fafc;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}.audioBtn:hover{background:#334155}
+.audioPanel{margin-top:15px;display:flex;align-items:center;gap:10px}.speedBtn{background:#1f2937;border:1px solid #374151;color:#fff;padding:6px 10px;border-radius:8px}.speedBtn.active{background:#2563eb;border-color:#60a5fa}
+.drawContainer{display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:15px}
+canvas{background:#000;border:3px dashed #475569;border-radius:12px;cursor:crosshair;touch-action:none;transition:border-color 0.3s, background-color 0.3s}
+canvas.draw-correct{border-color:#22c55e !important;border-style:solid !important;background-color:#052e16 !important}
+canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;background-color:#450a0a !important}
+.drawTools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.charSelect{background:#1f2937;color:#fff;border:1px solid #374151;padding:8px 12px;border-radius:8px;font-size:16px}
+.kanaTableGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:15px}
+.emptyCell{visibility:hidden}
+.legend-box{display:flex;gap:15px;background:#111827;padding:10px 14px;border-radius:10px;border:1px solid #273244;margin-top:12px;font-size:13px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px}
+@media(max-width:800px){
+.sidebar{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid #273244}
+.app{display:block}.main{margin:0;width:100%;padding:20px}.nav{display:flex;gap:5px;overflow:auto}.nav button{white-space:nowrap}
+.top{display:block}.progressBox{margin-top:20px}.kana,.kanaTableGrid{grid-template-columns:repeat(5,1fr)}
+}
+@media(max-width:500px){.options{grid-template-columns:1fr}.kana,.kanaTableGrid{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">🇯🇵 Japonês</div>
+  <div class="sub">Seu curso, do zero ao anime.</div>
+  <div class="nav">
+    <button class="active" data-page="home">🏠 Início</button>
+    <button data-page="aula1">📚 Aula 1</button>
+    <button data-page="hiragana">🈁 Hiragana</button>
+    <button data-page="pratica">✍️ Prática de Escrita</button>
+    <button data-page="vocab">🧠 Vocabulário</button>
+    <button data-page="progresso">📊 Progresso</button>
+  </div>
+</aside>
+
+<main class="main">
+  <section id="home" class="page">
+    <div class="top">
+      <div><h1>Japonês com ChatGPT</h1><div class="muted">V6 — áudios ajustados e navegação limpa 🇯🇵</div></div>
+      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div></div>
+    </div>
+    <div class="hero">
+      <span class="tag">AULA 1 DISPONÍVEL</span>
+      <h2>Como o japonês funciona</h2>
+      <p class="muted">Você vai começar pelos sons básicos, reconhecer algumas palavras e conhecer os primeiros hiragana. Sem decorar uma montanha de coisa.</p>
+      <div class="actions"><button class="btn" onclick="showPage('aula1')">Começar Aula 1 →</button></div>
+    </div>
+    <div class="grid">
+      <div class="card"><div class="stat">5</div><div class="small">Hiragana iniciais</div></div>
+      <div class="card"><div class="stat" id="knownCount">0</div><div class="small">Palavras aprendidas</div></div>
+      <div class="card"><div class="stat" id="scoreHome">0%</div><div class="small">Aproveitamento do quiz</div></div>
+    </div>
+  </section>
+
+  <section id="aula1" class="page lesson">
+    <div class="hero">
+      <span class="tag">AULA 1</span>
+      <h2>Como o japonês funciona</h2>
+      <p class="muted">A primeira regra: não precisamos decorar tudo de uma vez. Vamos reconhecer → entender → usar.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Os primeiros sons</h2>
+      <p>Estas são as cinco vogais do japonês. Clique sobre o cartão para ouvir o som e selecione o status no canto superior direito:</p>
+      
+      <div class="legend-box">
+        <span class="legend-item">⚪ <strong>Não iniciado</strong></span>
+        <span class="legend-item">🟡 <strong>Em estudo</strong></span>
+        <span class="legend-item">🟢 <strong>Aprendido / Dominado</strong></span>
+      </div>
+
+      <div class="kana" id="initialKanaList"></div>
+      <p class="muted" style="margin-top:12px">Por enquanto, o importante é começar a reconhecer o desenho e associá-lo ao som.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>2. Palavras que você já conhece</h2>
+      <div class="word"><span><b>ありがとう</b><br><span class="small">arigatō — obrigado</span></span><button class="audioBtn" onclick="speakJP('ありがとう', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>おはよう</b><br><span class="small">ohayō — bom dia</span></span><button class="audioBtn" onclick="speakJP('おはよう', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>何？</b><br><span class="small">nani? — o quê?</span></span><button class="audioBtn" onclick="speakJP('何？', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>かわいい</b><br><span class="small">kawaii — fofo(a)/bonito(a)</span></span><button class="audioBtn" onclick="speakJP('かわいい', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>大丈夫</b><br><span class="small">daijōbu — tudo bem / está tudo bem</span></span><button class="audioBtn" onclick="speakJP('大丈夫', this)">🔊 Ouvir</button></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>3. Frase de hoje</h2>
+      <div class="example">
+        <div class="jpbig">おはよう。元気？</div>
+        <div class="romajiBig">Ohayō. Genki?</div>
+        <div class="translation">Bom dia. Tudo bem?</div>
+        <button class="audioBtn" style="margin-top:12px" onclick="speakJP('おはよう。元気？', this)">🔊 Ouvir frase 「おはよう。元気？」</button>
+      </div>
+      <p><b>元気 (genki)</b> = bem / saudável / com energia.</p>
+      <p class="muted">Você não precisa traduzir palavra por palavra. Comece a reconhecer a frase como uma unidade.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>🔊 4. Treino de ouvido</h2>
+      <p>Agora você vai ouvir japonês de verdade. Escolha a velocidade e aperte <b>Ouvir</b>. Tente entender antes de olhar a tradução.</p>
+
+      <div class="word">
+        <span><b>ありがとう</b><br><span class="small">arigatō — obrigado</span></span>
+        <button class="audioBtn" onclick="speakJP('ありがとう', this)">🔊 Ouvir</button>
+      </div>
+      <div class="word">
+        <span><b>おはよう</b><br><span class="small">ohayō — bom dia</span></span>
+        <button class="audioBtn" onclick="speakJP('おはよう', this)">🔊 Ouvir</button>
+      </div>
+      <div class="word">
+        <span><b>何？</b><br><span class="small">nani? — o quê?</span></span>
+        <button class="audioBtn" onclick="speakJP('何？', this)">🔊 Ouvir</button>
+      </div>
+      <div class="word">
+        <span><b>大丈夫</b><br><span class="small">daijōbu — tudo bem</span></span>
+        <button class="audioBtn" onclick="speakJP('大丈夫', this)">🔊 Ouvir</button>
+      </div>
+
+      <div class="example">
+        <div class="jpbig">おはよう。元気？</div>
+        <div class="translation">Bom dia. Tudo bem?</div>
+        <button class="audioBtn" onclick="speakJP('おはよう。元気？', this)">🔊 Ouvir frase</button>
+      </div>
+
+      <div class="audioPanel">
+        <b>Velocidade:</b>
+        <button class="speedBtn active" id="speedSlow" onclick="setSpeed(0.7,this)">🐢 0,7×</button>
+        <button class="speedBtn" id="speedNormal" onclick="setSpeed(1,this)">🗣️ 1×</button>
+        <button class="speedBtn" id="speedFast" onclick="setSpeed(1.15,this)">🎬 1,15×</button>
+      </div>
+      <p class="audioNote" id="voiceStatus">A voz japonesa será escolhida automaticamente pelo navegador.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>6. Mini desafio</h2>
+      <div id="quiz"></div>
+
+      <div class="question">
+        <div class="q-title">
+          <span>🎧 Desafio de escuta</span>
+          <button class="audioBtn" onclick="speakJP('ありがとう', this)">🔊 Ouvir Áudio</button>
+        </div>
+        <p>Aperte o botão de áudio acima e descubra qual palavra foi falada.</p>
+        <div class="options" id="listenOptions"></div>
+        <div class="feedback" id="listenFeedback"></div>
+      </div>
+
+      <div class="actions"><button class="btn green" id="finishBtn" onclick="finishLesson()">Concluir Aula 1</button></div>
+    </div>
+  </section>
+
+  <section id="hiragana" class="page lesson">
+    <div class="hero"><span class="tag">ESCRITA</span><h2>Tabela Completa de Hiragana 📖</h2><p class="muted">Clique em qualquer caractere para ouvir o som. Altere o ícone no canto para marcar seu progresso de aprendizado.</p></div>
+    <div class="card">
+      <div class="legend-box" style="margin-bottom:15px">
+        <span class="legend-item">⚪ <strong>Não iniciado</strong></span>
+        <span class="legend-item">🟡 <strong>Em estudo</strong></span>
+        <span class="legend-item">🟢 <strong>Aprendido / Dominado</strong></span>
+      </div>
+      <div class="kanaTableGrid" id="fullHiraganaTable"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Teste rápido</h3>
+      <p>Qual hiragana representa o som <b>o</b>?</p>
+      <div class="options" id="kanaQuiz"></div>
+      <div class="feedback" id="kanaFeedback"></div>
+    </div>
+  </section>
+
+  <section id="pratica" class="page lesson">
+    <div class="hero"><span class="tag">PRÁTICA</span><h2>Área para desenhar e praticar Hiragana ✍️</h2><p class="muted">Escolha um caractere e desenhe o símbolo por completo. O sistema exige precisão e que você cubra todo o traço.</p></div>
+    <div class="card">
+      <div class="drawContainer">
+        <div class="drawTools">
+          <label><strong>Selecione:</strong></label>
+          <select class="charSelect" id="drawCharSelect" onchange="updateCanvasGuide()"></select>
+          <button class="btn secondary" onclick="speakCurrentDrawChar()">🔊 Ouvir</button>
+          <button class="btn secondary" onclick="clearCanvas()">🧼 Limpar</button>
+          <button class="btn green" onclick="verifyDrawing()">✅ Verificar Desenho</button>
+        </div>
+        <canvas id="paintCanvas" width="280" height="280"></canvas>
+        <div class="feedback" id="drawFeedback" style="font-size:16px;text-align:center"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vocab" class="page lesson">
+    <div class="hero"><span class="tag">VOCABULÁRIO</span><h2>Palavras da Aula 1</h2><p class="muted">Poucas palavras, mas usadas de verdade.</p></div>
+    <div class="card">
+      <div class="word"><span><b>ありがとう</b> — arigatō</span><button class="audioBtn" onclick="speakJP('ありがとう', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>おはよう</b> — ohayō</span><button class="audioBtn" onclick="speakJP('おはよう', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>何</b> — nani</span><button class="audioBtn" onclick="speakJP('何', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>かわいい</b> — kawaii</span><button class="audioBtn" onclick="speakJP('かわいい', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>大丈夫</b> — daijōbu</span><button class="audioBtn" onclick="speakJP('大丈夫', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>元気</b> — genki</span><button class="audioBtn" onclick="speakJP('元気', this)">🔊 Ouvir</button></div>
+    </div>
+  </section>
+
+  <section id="progresso" class="page lesson">
+    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Sem pressão. Só evolução.</h2><p class="muted">O navegador guarda seu progresso automaticamente.</p></div>
+    <div class="grid">
+      <div class="card"><div class="stat" id="scoreProgress">0%</div><div class="small">Quiz da Aula 1</div></div>
+      <div class="card"><div class="stat" id="lessonStatus">Não concluída</div><div class="small">Aula 1</div></div>
+      <div class="card"><div class="stat" id="learnedKanaCount">0/46</div><div class="small">Hiragana Dominados (🟢)</div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>🎧 Escada de dificuldade</h3>
+      <div class="word"><span><b>Nível 1</b><br><span class="small">Áudio + hiragana + romaji</span></span><span>🟢</span></div>
+      <div class="word"><span><b>Nível 2</b><br><span class="small">Áudio + hiragana, menos romaji</span></span><span>🔵</span></div>
+      <div class="word"><span><b>Nível 3</b><br><span class="small">Hiragana sem áudio nas alternativas</span></span><span>🟡</span></div>
+      <div class="word"><span><b>Nível 4</b><br><span class="small">Japonês → significado, sem ajuda</span></span><span>🔴</span></div>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+const allHiragana = [
+  {jp:'あ',r:'a'},{jp:'い',r:'i'},{jp:'う',r:'u'},{jp:'え',r:'e'},{jp:'お',r:'o'},
+  {jp:'か',r:'ka'},{jp:'き',r:'ki'},{jp:'く',r:'ku'},{jp:'け',r:'ke'},{jp:'こ',r:'ko'},
+  {jp:'さ',r:'sa'},{jp:'し',r:'shi'},{jp:'す',r:'su'},{jp:'せ',r:'se'},{jp:'そ',r:'so'},
+  {jp:'た',r:'ta'},{jp:'ち',r:'chi'},{jp:'つ',r:'tsu'},{jp:'て',r:'te'},{jp:'と',r:'to'},
+  {jp:'な',r:'na'},{jp:'に',r:'ni'},{jp:'ぬ',r:'nu'},{jp:'ね',r:'ne'},{jp:'の',r:'no'},
+  {jp:'は',r:'ha'},{jp:'ひ',r:'hi'},{jp:'ふ',r:'fu'},{jp:'へ',r:'he'},{jp:'ほ',r:'ho'},
+  {jp:'ま',r:'ma'},{jp:'み',r:'mi'},{jp:'む',r:'mu'},{jp:'め',r:'me'},{jp:'も',r:'mo'},
+  {jp:'や',r:'ya'},{jp:'',r:''},{jp:'ゆ',r:'yu'},{jp:'',r:''},{jp:'よ',r:'yo'},
+  {jp:'ら',r:'ra'},{jp:'り',r:'ri'},{jp:'る',r:'ru'},{jp:'れ',r:'re'},{jp:'ろ',r:'ro'},
+  {jp:'わ',r:'wa'},{jp:'',r:''},{jp:'',r:''},{jp:'',r:''},{jp:'を',r:'wo'},
+  {jp:'ん',r:'n'},{jp:'',r:''},{jp:'',r:''},{jp:'',r:''},{jp:'',r:''}
+];
+
+const state = JSON.parse(localStorage.getItem('jpCursoV3') || '{"score":0,"answered":0,"correct":0,"lessonDone":false,"kanaStatus":{}}');
+const quizData = [
+  {q:'O que significa 「ありがとう」?', targetJP:'ありがとう', options:['Obrigado','Bom dia','O quê?','Tudo bem'], a:0},
+  {q:'「おはよう」 significa...', targetJP:'おはよう', options:['Obrigado','Bom dia','Fofo','Leite'], a:1},
+  {q:'O que significa 「何？」?', targetJP:'何', options:['Tudo bem?','Obrigado','O quê?','Bom dia'], a:2},
+  {q:'「おはよう。元気？」 significa...', targetJP:'おはよう。元気？', options:['Obrigado. O quê?','Bom dia. Tudo bem?','Boa noite. Até amanhã.','Você é fofo.'], a:1}
+];
+
+function save(){localStorage.setItem('jpCursoV3',JSON.stringify(state)); updateUI();}
+function updateUI(){
+  const pct=state.answered?Math.round(state.correct/state.answered*100):0;
+  document.getElementById('topBar').style.width=pct+'%';
+  document.getElementById('topPct').textContent=pct+'%';
+  document.getElementById('scoreHome').textContent=pct+'%';
+  document.getElementById('scoreProgress').textContent=pct+'%';
+  document.getElementById('lessonStatus').textContent=state.lessonDone?'Concluída':'Não concluída';
+  document.getElementById('knownCount').textContent='6';
+
+  let greenCount = 0;
+  Object.values(state.kanaStatus).forEach(v => { if(v === '🟢') greenCount++; });
+  document.getElementById('learnedKanaCount').textContent = greenCount + '/46';
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id === 'pratica') { updateCanvasGuide(); }
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+
+let speechRate = 0.7;
+function setSpeed(rate, btn){
+  speechRate = rate;
+  document.querySelectorAll('.speedBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getJapaneseVoice(){
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  return voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('ja')) || null;
+}
+
+function speakJP(text, button){
+  if(!('speechSynthesis' in window)){
+    document.getElementById('voiceStatus').textContent='⚠️ Este navegador não oferece síntese de voz.';
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = getJapaneseVoice();
+  if(voice){
+    utter.voice = voice;
+    utter.lang = voice.lang;
+  }else{
+    utter.lang = 'ja-JP';
+  }
+  utter.rate = speechRate;
+  utter.pitch = 1;
+  window.speechSynthesis.speak(utter);
+}
+
+function cycleStatus(char, e) {
+  if(e) e.stopPropagation();
+  const current = state.kanaStatus[char] || '⚪';
+  const next = current === '⚪' ? '🟡' : current === '🟡' ? '🟢' : '⚪';
+  state.kanaStatus[char] = next;
+  save();
+  renderKanaTables();
+}
+
+function renderKanaTables(){
+  const initialContainer = document.getElementById('initialKanaList');
+  initialContainer.innerHTML = '';
+  allHiragana.slice(0, 5).forEach(item => {
+    const box = createKanaCard(item);
+    initialContainer.appendChild(box);
+  });
+
+  const fullTable = document.getElementById('fullHiraganaTable');
+  fullTable.innerHTML = '';
+  allHiragana.forEach(item => {
+    if(!item.jp) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'emptyCell';
+      fullTable.appendChild(emptyDiv);
+    } else {
+      const box = createKanaCard(item);
+      fullTable.appendChild(box);
+    }
+  });
+}
+
+function createKanaCard(item) {
+  const status = state.kanaStatus[item.jp] || '⚪';
+  const box = document.createElement('div');
+  box.className = 'kanaBox';
+  box.onclick = () => speakJP(item.jp);
+  box.innerHTML = `
+    <button class="status-btn" onclick="cycleStatus('${item.jp}', event)">${status}</button>
+    <div class="jp">${item.jp}</div>
+    <div class="romaji">${item.r}</div>
+  `;
+  return box;
+}
+
+function renderQuiz(){
+  const el=document.getElementById('quiz'); el.innerHTML='';
+  quizData.forEach((item,i)=>{
+    const box=document.createElement('div'); box.className='question';
+    box.innerHTML=`
+      <div class="q-title">
+        <span>${i+1}. ${item.q}</span>
+        <button class="audioBtn" onclick="speakJP('${item.targetJP}', this)">🔊 Ouvir</button>
+      </div>
+      <div class="options"></div>
+      <div class="feedback"></div>
+    `;
+    const opts=box.querySelector('.options'), fb=box.querySelector('.feedback');
+    item.options.forEach((op,j)=>{
+      const row=document.createElement('div'); row.className='option';
+      const text=document.createElement('span'); text.className='optionText'; text.textContent=op;
+      row.appendChild(text);
+
+      row.onclick=()=>{
+        if(row.dataset.done) return;
+        row.dataset.done='1'; state.answered++;
+        if(j===item.a){
+          row.classList.add('correct'); fb.textContent='✅ Mandou bem!'; state.correct++;
+        }else{
+          row.classList.add('wrong'); fb.textContent='❌ Quase! A resposta é: '+item.options[item.a];
+          opts.children[item.a].classList.add('correct');
+        }
+        save();
+      };
+      opts.appendChild(row);
+    });
+    el.appendChild(box);
+  });
+}
+
+function renderListenQuiz(){
+  const el=document.getElementById('listenOptions');
+  const fb=document.getElementById('listenFeedback');
+  const options=['ありがとう','おはよう','何？','大丈夫'];
+  options.forEach((x,i)=>{
+    const row=document.createElement('div'); row.className='option';
+    const text=document.createElement('span'); text.className='optionText'; text.textContent=x;
+    row.appendChild(text);
+    row.onclick=()=>{
+      if(row.dataset.done) return;
+      row.dataset.done='1';
+      if(x==='ありがとう'){
+        row.classList.add('correct'); fb.textContent='✅ Acertou! Você ouviu ありがとう.';
+      }else{
+        row.classList.add('wrong'); fb.textContent='❌ Não foi essa. O áudio era ありがとう.';
+        el.children[0].classList.add('correct');
+      }
+    };
+    el.appendChild(row);
+  });
+}
+
+function renderKanaQuiz(){
+  const options=['あ','い','う','え','お'];
+  const el=document.getElementById('kanaQuiz'), fb=document.getElementById('kanaFeedback');
+  options.forEach(x=>{
+    const b=document.createElement('button');b.className='option';
+    b.innerHTML = `<span class="optionText">${x}</span><button class="miniAudio" onclick="event.stopPropagation(); speakJP('${x}', this)">🔊</button>`;
+    b.onclick=()=>{if(x==='お'){b.classList.add('correct');fb.textContent='✅ Exatamente! お = o';}else{b.classList.add('wrong');fb.textContent='❌ Ainda não. Procure o símbolo que representa o som “o”. お';}};
+    el.appendChild(b);
+  });
+}
+
+function finishLesson(){
+  if(state.answered<quizData.length){alert('Falta responder alguma questão. Faz o mini desafio primeiro 😎');return}
+  state.lessonDone=true; save();
+  alert('Aula 1 concluída! 🇯🇵 Agora você já tem a primeira base.');
+  showPage('progresso');
+}
+
+// Canvas & Algoritmo Duplo (Precisão + Completude)
+const canvas = document.getElementById('paintCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let userHasDrawn = false;
+let targetMask = null;
+let coreMask = null;
+let corePointsTotal = 0;
+
+function initCanvas() {
+  const select = document.getElementById('drawCharSelect');
+  allHiragana.filter(x => x.jp).forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.jp;
+    opt.textContent = `${item.jp} (${item.r})`;
+    select.appendChild(opt);
+  });
+
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mousemove', draw);
+  
+  canvas.addEventListener('touchstart', (e) => { startDrawing(e.touches[0]); e.preventDefault(); });
+  canvas.addEventListener('touchend', stopDrawing);
+  canvas.addEventListener('touchmove', (e) => { draw(e.touches[0]); e.preventDefault(); });
+}
+
+function startDrawing(e) {
+  drawing = true;
+  userHasDrawn = true;
+  ctx.beginPath();
+  const rect = canvas.getBoundingClientRect();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function stopDrawing() { drawing = false; ctx.beginPath(); }
+
+function draw(e) {
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#60a5fa';
+
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.stroke();
+}
+
+function clearCanvas() {
+  userHasDrawn = false;
+  canvas.className = '';
+  document.getElementById('drawFeedback').textContent = '';
+  updateCanvasGuide();
+}
+
+function updateCanvasGuide() {
+  canvas.className = '';
+  document.getElementById('drawFeedback').textContent = '';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const selectedChar = document.getElementById('drawCharSelect').value || 'あ';
+  
+  ctx.font = '180px sans-serif';
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(selectedChar, canvas.width / 2, canvas.height / 2);
+
+  const coreCanvas = document.createElement('canvas');
+  coreCanvas.width = canvas.width; coreCanvas.height = canvas.height;
+  const coreCtx = coreCanvas.getContext('2d');
+  coreCtx.font = '180px sans-serif';
+  coreCtx.textAlign = 'center'; coreCtx.textBaseline = 'middle';
+  coreCtx.fillStyle = '#ffffff';
+  coreCtx.fillText(selectedChar, canvas.width / 2, canvas.height / 2);
+  coreMask = coreCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+  corePointsTotal = 0;
+  for (let i = 0; i < coreMask.length; i += 4) {
+    if (coreMask[i] > 100) corePointsTotal++;
+  }
+
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = canvas.width; offCanvas.height = canvas.height;
+  const offCtx = offCanvas.getContext('2d');
+  offCtx.font = '180px sans-serif';
+  offCtx.textAlign = 'center'; offCtx.textBaseline = 'middle';
+  offCtx.lineWidth = 36;
+  offCtx.strokeStyle = '#ffffff';
+  offCtx.fillStyle = '#ffffff';
+  offCtx.strokeText(selectedChar, canvas.width / 2, canvas.height / 2);
+  offCtx.fillText(selectedChar, canvas.width / 2, canvas.height / 2);
+  targetMask = offCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+}
+
+function verifyDrawing() {
+  const fb = document.getElementById('drawFeedback');
+  if(!userHasDrawn){
+    canvas.className = 'draw-wrong';
+    fb.style.color = '#ef4444';
+    fb.textContent = '⚠️ Por favor, desenhe o caractere antes de verificar!';
+    return;
+  }
+
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let correctPixels = 0;
+  let wrongPixels = 0;
+  let coreCoveredPoints = 0;
+
+  for (let i = 0; i < imgData.length; i += 4) {
+    const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
+    const isUserStroke = (r > 80 && g > 140 && b > 200);
+
+    if (isUserStroke) {
+      if (targetMask[i] > 100) {
+        correctPixels++;
+      } else {
+        wrongPixels++;
+      }
+
+      if (coreMask[i] > 100) {
+        coreCoveredPoints++;
+      }
+    }
+  }
+
+  const strokeAccuracy = correctPixels / (correctPixels + wrongPixels || 1);
+  const completionRatio = coreCoveredPoints / (corePointsTotal || 1);
+
+  if (strokeAccuracy >= 0.80 && wrongPixels < 300 && completionRatio >= 0.65) {
+    canvas.className = 'draw-correct';
+    fb.style.color = '#22c55e';
+    fb.textContent = '🎉 Excelente! Caractere desenhado corretamente e por completo!';
+  } else {
+    canvas.className = 'draw-wrong';
+    fb.style.color = '#ef4444';
+
+    if (completionRatio < 0.65) {
+      fb.textContent = '❌ Desenho incompleto! Você precisa fazer todos os traços do caractere.';
+    } else if (wrongPixels >= 300 || strokeAccuracy < 0.80) {
+      fb.textContent = '❌ Traços fora da linha! Tente seguir a forma com mais precisão.';
+    } else {
+      fb.textContent = '❌ Desenho incorreto. Verifique a forma e tente novamente!';
+    }
+  }
+}
+
+function speakCurrentDrawChar() {
+  const selectedChar = document.getElementById('drawCharSelect').value || 'あ';
+  speakJP(selectedChar);
+}
+
+if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>getJapaneseVoice(); }
+renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI();
+</script>
+</body>
+</html>
