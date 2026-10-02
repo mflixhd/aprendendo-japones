@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aprendendo Japonês — V7.3</title>
+<title>Aprendendo Japonês — V7.4</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
@@ -44,6 +44,7 @@ button{font:inherit;cursor:pointer}
 .speedOption:hover,.speedOption.active{background:#2563eb;border-color:#60a5fa}
 .speedOption small{color:#cbd5e1}
 .saveBadge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#86efac;margin-top:8px}
+.loginBtn{margin-top:8px;width:100%;border:1px solid #475569;background:#1f2937;color:#fff;padding:9px 11px;border-radius:9px;font-weight:700}.loginBtn:hover{background:#263449}.loginBtn.logged{background:#166534;border-color:#22c55e}.loginBtn:disabled{opacity:.7;cursor:wait}
 
 h1{font-size:30px;margin:0 0 5px}.muted{color:#9ca3af}
 .progressBox{min-width:220px}.progress{height:9px;background:#1f2937;border-radius:99px;overflow:hidden}.bar{height:100%;background:#22c55e;width:0%;transition:.3s}
@@ -142,8 +143,8 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 <main class="main">
   <section id="home" class="page">
     <div class="top">
-      <div><h1>Aprendendo Japonês</h1><div class="muted">V7.3 — progresso sincronizado na nuvem 🇯🇵</div></div>
-      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div><div class="small" id="profileStatus" style="margin-top:5px;color:#60a5fa">☁️ Conectando ao perfil...</div></div>
+      <div><h1>Aprendendo Japonês</h1><div class="muted">V7.4 — progresso sincronizado na nuvem 🇯🇵</div></div>
+      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div><div class="small" id="profileStatus" style="margin-top:5px;color:#60a5fa">☁️ Conectando ao perfil...</div><button class="loginBtn" id="googleLoginBtn" type="button" onclick="loginWithGoogle()">🔐 Entrar com Google</button></div>
     </div>
     <div class="hero">
       <span class="tag">AULA 1 DISPONÍVEL</span>
@@ -317,11 +318,11 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyCjBl8-fOQfX2_uzgTnXvJE7h5sDQdsits",
+    apiKey: "AIzaSyCjBl8-fOQf2_uzgTnXvJE7h5sDQdsits",
     authDomain: "aprendendo-japones.firebaseapp.com",
     projectId: "aprendendo-japones",
     storageBucket: "aprendendo-japones.firebasestorage.app",
@@ -333,10 +334,12 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseAuth = getAuth(firebaseApp);
   const firebaseDb = getFirestore(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
 
   window.firebaseSync = {
     uid: null,
     ready: false,
+    user: null,
     async save(state) {
       if (!this.uid) return;
       try {
@@ -352,12 +355,47 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
       } catch (e) {
         console.warn("Falha ao sincronizar com o Firebase.", e);
       }
+    },
+    async signInGoogle() {
+      const user = firebaseAuth.currentUser;
+      if (!user) throw new Error("Perfil Firebase ainda não está pronto.");
+
+      if (!user.isAnonymous) {
+        return user;
+      }
+
+      try {
+        const result = await linkWithPopup(user, googleProvider);
+        this.user = result.user;
+        this.uid = result.user.uid;
+        return result.user;
+      } catch (e) {
+        if (e.code === 'auth/credential-already-in-use' || e.code === 'auth/account-exists-with-different-credential') {
+          const result = await signInWithPopup(firebaseAuth, googleProvider);
+          this.user = result.user;
+          this.uid = result.user.uid;
+          return result.user;
+        }
+        throw e;
+      }
     }
   };
 
   window.firebaseReady = new Promise((resolve) => {
+    let resolved = false;
+
     onAuthStateChanged(firebaseAuth, async (user) => {
-      if (!user) return;
+      if (!user) {
+        if (!firebaseAuth.currentUser) {
+          signInAnonymously(firebaseAuth).catch((e) => {
+            console.warn("Falha na autenticação anônima do Firebase.", e);
+            if (!resolved) { resolved = true; resolve(null); }
+          });
+        }
+        return;
+      }
+
+      window.firebaseSync.user = user;
       window.firebaseSync.uid = user.uid;
       try {
         const ref = doc(firebaseDb, "users", user.uid);
@@ -374,13 +412,11 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
         window.firebaseRemoteState = null;
         window.firebaseRemoteStateLoaded = true;
       }
-      window.firebaseSync.ready = true;
-      resolve(user);
-    });
 
-    signInAnonymously(firebaseAuth).catch((e) => {
-      console.warn("Falha na autenticação anônima do Firebase.", e);
-      resolve(null);
+      window.firebaseSync.ready = true;
+      if (!resolved) { resolved = true; resolve(user); }
+
+      if (typeof updateProfileUI === 'function') updateProfileUI(user);
     });
   });
 </script>
@@ -438,14 +474,60 @@ function save(){
   }, 250);
 }
 
+function updateProfileUI(user){
+  const profileEl = document.getElementById('profileStatus');
+  const btn = document.getElementById('googleLoginBtn');
+  if(!profileEl || !btn) return;
+
+  if(user && !user.isAnonymous){
+    const name = user.displayName || user.email || 'Google';
+    profileEl.textContent = '☁️ Google conectado — ' + name;
+    profileEl.style.color = '#86efac';
+    btn.textContent = '✅ Google conectado';
+    btn.classList.add('logged');
+    btn.disabled = true;
+  }else{
+    profileEl.textContent = '☁️ Perfil temporário sincronizado';
+    profileEl.style.color = '#60a5fa';
+    btn.textContent = '🔐 Entrar com Google';
+    btn.classList.remove('logged');
+    btn.disabled = false;
+  }
+}
+
+async function loginWithGoogle(){
+  const btn = document.getElementById('googleLoginBtn');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Conectando ao Google...'; }
+  try{
+    await window.firebaseReady;
+    const user = await window.firebaseSync.signInGoogle();
+    remoteHydrated = false;
+    window.firebaseRemoteState = null;
+    await hydrateFromFirebase();
+    updateProfileUI(user);
+    await window.firebaseSync.save(state);
+    alert('Google conectado! ☁️ Seu progresso agora fica ligado à sua conta.');
+  }catch(e){
+    console.error(e);
+    if(btn) btn.disabled = false;
+    updateProfileUI(window.firebaseSync?.user);
+    if(e.code === 'auth/popup-closed-by-user') {
+      if(btn) btn.textContent = '🔐 Entrar com Google';
+      return;
+    }
+    if(btn) btn.textContent = '🔐 Entrar com Google';
+    alert('Não foi possível conectar ao Google. Verifique se o pop-up foi permitido e tente novamente.');
+  }
+}
+
 async function hydrateFromFirebase(){
   if(!window.firebaseReady) return;
   await window.firebaseReady;
 
   if(remoteHydrated || !window.firebaseSync?.ready) return;
   remoteHydrated = true;
-  const profileEl = document.getElementById('profileStatus');
-  if(profileEl) profileEl.textContent = '☁️ Perfil sincronizado';
+  const user = window.firebaseSync.user;
+  updateProfileUI(user);
 
   const remote = window.firebaseRemoteState;
   if(remote){
