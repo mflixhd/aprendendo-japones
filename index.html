@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Japonês com ChatGPT — V7.2</title>
+<title>Aprendendo Japonês — V7.3</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
@@ -96,7 +96,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 <body>
 <div class="app">
 <aside class="sidebar">
-  <div class="logo">🇯🇵 Japonês</div>
+  <div class="logo">🇯🇵 Aprendendo Japonês</div>
   <div class="sub">Seu curso, do zero ao anime.</div>
   <div class="nav">
     <button class="active" data-page="home">🏠 Início</button>
@@ -142,8 +142,8 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 <main class="main">
   <section id="home" class="page">
     <div class="top">
-      <div><h1>Japonês com ChatGPT</h1><div class="muted">V7.2 — progresso salvo e áudio global 🇯🇵</div></div>
-      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div></div>
+      <div><h1>Aprendendo Japonês</h1><div class="muted">V7.3 — progresso sincronizado na nuvem 🇯🇵</div></div>
+      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div><div class="small" id="profileStatus" style="margin-top:5px;color:#60a5fa">☁️ Conectando ao perfil...</div></div>
     </div>
     <div class="hero">
       <span class="tag">AULA 1 DISPONÍVEL</span>
@@ -227,7 +227,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
         <button class="audioBtn" onclick="speakJP('おはよう。元気？', this)">🔊 Ouvir frase</button>
       </div>
 
-      <div class="saveBadge">💾 Configurações e progresso salvos automaticamente neste navegador.</div>
+      <div class="saveBadge">☁️ Configurações e progresso sincronizados automaticamente.</div>
       <p class="audioNote" id="voiceStatus">A voz japonesa será escolhida automaticamente pelo navegador.</p>
     </div>
 
@@ -297,7 +297,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
   </section>
 
   <section id="progresso" class="page lesson">
-    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Sem pressão. Só evolução.</h2><p class="muted">O navegador guarda seu progresso automaticamente. Este save continua nas próximas versões do curso.</p></div>
+    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Sem pressão. Só evolução.</h2><p class="muted">Seu progresso é salvo automaticamente e associado ao seu perfil.</p></div>
     <div class="grid">
       <div class="card"><div class="stat" id="scoreProgress">0%</div><div class="small">Quiz da Aula 1</div></div>
       <div class="card"><div class="stat" id="lessonStatus">Não concluída</div><div class="small">Aula 1</div></div>
@@ -313,6 +313,77 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
   </section>
 </main>
 </div>
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjBl8-fOQfX2_uzgTnXvJE7h5sDQdsits",
+    authDomain: "aprendendo-japones.firebaseapp.com",
+    projectId: "aprendendo-japones",
+    storageBucket: "aprendendo-japones.firebasestorage.app",
+    messagingSenderId: "323134572955",
+    appId: "1:323134572955:web:3078e4b4fbed6b2c09393e",
+    measurementId: "G-NGG2L0LFEB"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const firebaseAuth = getAuth(firebaseApp);
+  const firebaseDb = getFirestore(firebaseApp);
+
+  window.firebaseSync = {
+    uid: null,
+    ready: false,
+    async save(state) {
+      if (!this.uid) return;
+      try {
+        await setDoc(doc(firebaseDb, "users", this.uid), {
+          score: state.score,
+          answered: state.answered,
+          correct: state.correct,
+          lessonDone: state.lessonDone,
+          kanaStatus: state.kanaStatus || {},
+          speechRate: state.speechRate || 0.7,
+          updatedAt: Date.now()
+        });
+      } catch (e) {
+        console.warn("Falha ao sincronizar com o Firebase.", e);
+      }
+    }
+  };
+
+  window.firebaseReady = new Promise((resolve) => {
+    onAuthStateChanged(firebaseAuth, async (user) => {
+      if (!user) return;
+      window.firebaseSync.uid = user.uid;
+      try {
+        const ref = doc(firebaseDb, "users", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          window.firebaseRemoteState = snap.data();
+          window.firebaseRemoteStateLoaded = true;
+        } else {
+          window.firebaseRemoteState = null;
+          window.firebaseRemoteStateLoaded = true;
+        }
+      } catch (e) {
+        console.warn("Falha ao carregar o progresso do Firebase.", e);
+        window.firebaseRemoteState = null;
+        window.firebaseRemoteStateLoaded = true;
+      }
+      window.firebaseSync.ready = true;
+      resolve(user);
+    });
+
+    signInAnonymously(firebaseAuth).catch((e) => {
+      console.warn("Falha na autenticação anônima do Firebase.", e);
+      resolve(null);
+    });
+  });
+</script>
 
 <script>
 const allHiragana = [
@@ -353,10 +424,47 @@ const quizData = [
   {q:'「おはよう。元気？」 significa...', targetJP:'おはよう。元気？', options:['Obrigado. O quê?','Bom dia. Tudo bem?','Boa noite. Até amanhã.','Você é fofo.'], a:1}
 ];
 
+let remoteHydrated = false;
+let saveTimer = null;
+
 function save(){
   try{ localStorage.setItem(SAVE_KEY,JSON.stringify(state)); }
-  catch(e){ console.warn('Falha ao salvar progresso.',e); }
+  catch(e){ console.warn('Falha ao salvar progresso local.',e); }
   updateUI();
+
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if(window.firebaseSync?.ready) window.firebaseSync.save(state);
+  }, 250);
+}
+
+async function hydrateFromFirebase(){
+  if(!window.firebaseReady) return;
+  await window.firebaseReady;
+
+  if(remoteHydrated || !window.firebaseSync?.ready) return;
+  remoteHydrated = true;
+  const profileEl = document.getElementById('profileStatus');
+  if(profileEl) profileEl.textContent = '☁️ Perfil sincronizado';
+
+  const remote = window.firebaseRemoteState;
+  if(remote){
+    Object.assign(state, {
+      score: remote.score ?? state.score,
+      answered: remote.answered ?? state.answered,
+      correct: remote.correct ?? state.correct,
+      lessonDone: remote.lessonDone ?? state.lessonDone,
+      kanaStatus: remote.kanaStatus ?? state.kanaStatus,
+      speechRate: remote.speechRate ?? state.speechRate
+    });
+    speechRate = Number(state.speechRate) || 0.7;
+    try{ localStorage.setItem(SAVE_KEY,JSON.stringify(state)); }catch(e){}
+    updateUI();
+    updateSpeedUI();
+    renderKanaTables();
+  }else{
+    window.firebaseSync.save(state);
+  }
 }
 function updateUI(){
   const pct=state.answered?Math.round(state.correct/state.answered*100):0;
@@ -721,6 +829,7 @@ function speakCurrentDrawChar() {
 
 if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>getJapaneseVoice(); }
 renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI(); updateSpeedUI();
+hydrateFromFirebase();
 </script>
 </body>
 </html>
