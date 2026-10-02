@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Japonês com ChatGPT — V6</title>
+<title>Japonês com ChatGPT — V7.2</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
@@ -15,6 +15,36 @@ button{font:inherit;cursor:pointer}
 .nav button:hover,.nav button.active{background:#1f2937;color:#fff}
 .main{margin-left:250px;width:calc(100% - 250px);padding:35px;max-width:1250px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:28px}
+.headerTools{position:relative}
+.headerToolBtn{border:1px solid #374151;background:#1f2937;color:#fff;padding:10px 14px;border-radius:10px;font-weight:700}
+.headerToolBtn:hover{background:#263449}
+.speedPopup{display:none;position:absolute;right:0;top:calc(100% + 8px);width:190px;background:#111827;border:1px solid #374151;border-radius:12px;padding:10px;box-shadow:0 15px 40px #0008;z-index:50}
+.speedPopup.open{display:block}
+.speedPopupTitle{font-size:13px;color:#cbd5e1;padding:5px 7px 9px}
+.popupSpeedBtn{width:100%;border:1px solid #374151;background:#1f2937;color:#fff;padding:9px 10px;border-radius:8px;margin-top:5px;text-align:left}
+.popupSpeedBtn:hover,.popupSpeedBtn.active{background:#2563eb;border-color:#60a5fa}
+.audioCategoryBtn{width:100%;border:0;background:transparent;color:#cbd5e1;text-align:left;padding:12px;border-radius:10px;margin:3px 0;display:block}
+.audioCategoryBtn:hover{background:#1f2937;color:#fff}
+.audioModalOverlay{display:none;position:fixed;inset:0;background:#0009;z-index:200;align-items:center;justify-content:center;padding:20px}
+.audioModalOverlay.open{display:flex}
+.audioModal{width:min(430px,100%);background:#111827;border:1px solid #374151;border-radius:18px;box-shadow:0 25px 70px #0009;padding:20px}
+.audioModalHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.audioModalHeader h2{margin:0;font-size:22px}
+.modalClose{border:0;background:#1f2937;color:#fff;width:36px;height:36px;border-radius:9px}
+.audioSetting{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #334155;background:#151c27;color:#fff;border-radius:12px;padding:15px;text-align:left}
+.audioSetting:hover{background:#1f2937;border-color:#475569}
+.audioSettingTitle{font-weight:700}.audioSettingValue{font-size:13px;color:#94a3b8;margin-top:4px}
+.audioSettingArrow{font-size:20px;color:#94a3b8}
+.audioModalNote{font-size:12px;color:#94a3b8;margin:14px 2px 0}
+.speedModalOverlay{display:none;position:fixed;inset:0;background:#0009;z-index:210;align-items:center;justify-content:center;padding:20px}
+.speedModalOverlay.open{display:flex}
+.speedModal{width:min(360px,100%);background:#111827;border:1px solid #374151;border-radius:18px;padding:18px;box-shadow:0 25px 70px #0009}
+.speedModalTitle{font-size:19px;font-weight:800;margin-bottom:12px}
+.speedOption{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid #374151;background:#1f2937;color:#fff;padding:12px 13px;border-radius:10px;margin-top:8px;text-align:left}
+.speedOption:hover,.speedOption.active{background:#2563eb;border-color:#60a5fa}
+.speedOption small{color:#cbd5e1}
+.saveBadge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#86efac;margin-top:8px}
+
 h1{font-size:30px;margin:0 0 5px}.muted{color:#9ca3af}
 .progressBox{min-width:220px}.progress{height:9px;background:#1f2937;border-radius:99px;overflow:hidden}.bar{height:100%;background:#22c55e;width:0%;transition:.3s}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
@@ -55,6 +85,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 .legend-box{display:flex;gap:15px;background:#111827;padding:10px 14px;border-radius:10px;border:1px solid #273244;margin-top:12px;font-size:13px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px}
 @media(max-width:800px){
+.headerTools{margin-top:10px}.speedPopup{left:0;right:auto}
 .sidebar{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid #273244}
 .app{display:block}.main{margin:0;width:100%;padding:20px}.nav{display:flex;gap:5px;overflow:auto}.nav button{white-space:nowrap}
 .top{display:block}.progressBox{margin-top:20px}.kana,.kanaTableGrid{grid-template-columns:repeat(5,1fr)}
@@ -74,13 +105,44 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
     <button data-page="pratica">✍️ Prática de Escrita</button>
     <button data-page="vocab">🧠 Vocabulário</button>
     <button data-page="progresso">📊 Progresso</button>
+    <button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Velocidade do Áudio</button>
   </div>
 </aside>
+
+<!-- Configurações globais de áudio: ficam sobre a página atual, sem navegação -->
+<div class="audioModalOverlay" id="audioModalOverlay" onclick="closeAudioModal(event)">
+  <div class="audioModal" onclick="event.stopPropagation()">
+    <div class="audioModalHeader">
+      <h2>🔊 Áudio</h2>
+      <button class="modalClose" type="button" onclick="closeAudioModal()">✕</button>
+    </div>
+    <button class="audioSetting" type="button" onclick="openSpeedModal()">
+      <span>
+        <span class="audioSettingTitle">Velocidade de fala</span>
+        <span class="audioSettingValue" id="audioSpeedValue">0,7×</span>
+      </span>
+      <span class="audioSettingArrow">›</span>
+    </button>
+    <p class="audioModalNote">A configuração vale para todos os áudios do curso e pode ser alterada sem sair da atividade atual.</p>
+  </div>
+</div>
+
+<div class="speedModalOverlay" id="speedModalOverlay" onclick="closeSpeedModal(event)">
+  <div class="speedModal" onclick="event.stopPropagation()">
+    <div class="audioModalHeader">
+      <div class="speedModalTitle">Velocidade de fala</div>
+      <button class="modalClose" type="button" onclick="closeSpeedModal()">✕</button>
+    </div>
+    <button class="speedOption" data-rate="0.7" type="button" onclick="setGlobalSpeed(0.7)"><span>🐢 0,7×</span><small>Lenta</small></button>
+    <button class="speedOption" data-rate="1" type="button" onclick="setGlobalSpeed(1)"><span>🗣️ 1×</span><small>Normal</small></button>
+    <button class="speedOption" data-rate="1.15" type="button" onclick="setGlobalSpeed(1.15)"><span>🎬 1,15×</span><small>Rápida</small></button>
+  </div>
+</div>
 
 <main class="main">
   <section id="home" class="page">
     <div class="top">
-      <div><h1>Japonês com ChatGPT</h1><div class="muted">V6 — áudios ajustados e navegação limpa 🇯🇵</div></div>
+      <div><h1>Japonês com ChatGPT</h1><div class="muted">V7.2 — progresso salvo e áudio global 🇯🇵</div></div>
       <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div></div>
     </div>
     <div class="hero">
@@ -165,12 +227,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
         <button class="audioBtn" onclick="speakJP('おはよう。元気？', this)">🔊 Ouvir frase</button>
       </div>
 
-      <div class="audioPanel">
-        <b>Velocidade:</b>
-        <button class="speedBtn active" id="speedSlow" onclick="setSpeed(0.7,this)">🐢 0,7×</button>
-        <button class="speedBtn" id="speedNormal" onclick="setSpeed(1,this)">🗣️ 1×</button>
-        <button class="speedBtn" id="speedFast" onclick="setSpeed(1.15,this)">🎬 1,15×</button>
-      </div>
+      <div class="saveBadge">💾 Configurações e progresso salvos automaticamente neste navegador.</div>
       <p class="audioNote" id="voiceStatus">A voz japonesa será escolhida automaticamente pelo navegador.</p>
     </div>
 
@@ -240,7 +297,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
   </section>
 
   <section id="progresso" class="page lesson">
-    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Sem pressão. Só evolução.</h2><p class="muted">O navegador guarda seu progresso automaticamente.</p></div>
+    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Sem pressão. Só evolução.</h2><p class="muted">O navegador guarda seu progresso automaticamente. Este save continua nas próximas versões do curso.</p></div>
     <div class="grid">
       <div class="card"><div class="stat" id="scoreProgress">0%</div><div class="small">Quiz da Aula 1</div></div>
       <div class="card"><div class="stat" id="lessonStatus">Não concluída</div><div class="small">Aula 1</div></div>
@@ -272,7 +329,23 @@ const allHiragana = [
   {jp:'ん',r:'n'},{jp:'',r:''},{jp:'',r:''},{jp:'',r:''},{jp:'',r:''}
 ];
 
-const state = JSON.parse(localStorage.getItem('jpCursoV3') || '{"score":0,"answered":0,"correct":0,"lessonDone":false,"kanaStatus":{}}');
+const SAVE_KEY = 'japonesComChatGPT_save';
+const defaultState = {score:0,answered:0,correct:0,lessonDone:false,kanaStatus:{},speechRate:0.7};
+
+function loadState(){
+  try{
+    const current = localStorage.getItem(SAVE_KEY);
+    if(current) return {...defaultState,...JSON.parse(current)};
+    const legacy = localStorage.getItem('jpCursoV3');
+    if(legacy){
+      const migrated = {...defaultState,...JSON.parse(legacy)};
+      localStorage.setItem(SAVE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+  }catch(e){ console.warn('Falha ao carregar progresso.',e); }
+  return {...defaultState};
+}
+const state = loadState();
 const quizData = [
   {q:'O que significa 「ありがとう」?', targetJP:'ありがとう', options:['Obrigado','Bom dia','O quê?','Tudo bem'], a:0},
   {q:'「おはよう」 significa...', targetJP:'おはよう', options:['Obrigado','Bom dia','Fofo','Leite'], a:1},
@@ -280,7 +353,11 @@ const quizData = [
   {q:'「おはよう。元気？」 significa...', targetJP:'おはよう。元気？', options:['Obrigado. O quê?','Bom dia. Tudo bem?','Boa noite. Até amanhã.','Você é fofo.'], a:1}
 ];
 
-function save(){localStorage.setItem('jpCursoV3',JSON.stringify(state)); updateUI();}
+function save(){
+  try{ localStorage.setItem(SAVE_KEY,JSON.stringify(state)); }
+  catch(e){ console.warn('Falha ao salvar progresso.',e); }
+  updateUI();
+}
 function updateUI(){
   const pct=state.answered?Math.round(state.correct/state.answered*100):0;
   document.getElementById('topBar').style.width=pct+'%';
@@ -302,14 +379,51 @@ function showPage(id){
   window.scrollTo({top:0,behavior:'smooth'});
   if(id === 'pratica') { updateCanvasGuide(); }
 }
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+document.querySelectorAll('.nav button[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
 
-let speechRate = 0.7;
-function setSpeed(rate, btn){
-  speechRate = rate;
-  document.querySelectorAll('.speedBtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+// O botão Áudio é uma configuração global, não uma página.
+// Impede qualquer navegação acidental ao abrir/fechar os modais.
+document.querySelector('.audioCategoryBtn')?.addEventListener('click', e=>e.stopPropagation());
+
+let speechRate = Number(state.speechRate) || 0.7;
+
+function formatSpeed(rate){
+  return (rate===1?'1':rate.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2}))+'×';
 }
+function updateSpeedUI(){
+  const value=formatSpeed(speechRate);
+  const audioValue=document.getElementById('audioSpeedValue');
+  if(audioValue) audioValue.textContent=value;
+  document.querySelectorAll('.speedOption').forEach(b=>{
+    b.classList.toggle('active',Number(b.dataset.rate)===speechRate);
+  });
+}
+function openAudioModal(){
+  document.getElementById('audioModalOverlay')?.classList.add('open');
+}
+function closeAudioModal(e){
+  if(e && e.target !== e.currentTarget) return;
+  document.getElementById('audioModalOverlay')?.classList.remove('open');
+}
+function openSpeedModal(){
+  document.getElementById('speedModalOverlay')?.classList.add('open');
+  updateSpeedUI();
+}
+function closeSpeedModal(e){
+  if(e && e.target !== e.currentTarget) return;
+  document.getElementById('speedModalOverlay')?.classList.remove('open');
+}
+function setGlobalSpeed(rate){
+  speechRate=rate;
+  state.speechRate=rate;
+  save();
+  updateSpeedUI();
+  closeSpeedModal();
+  closeAudioModal();
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){ closeSpeedModal(); closeAudioModal(); }
+});
 
 function getJapaneseVoice(){
   const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
@@ -606,7 +720,7 @@ function speakCurrentDrawChar() {
 }
 
 if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>getJapaneseVoice(); }
-renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI();
+renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI(); updateSpeedUI();
 </script>
 </body>
 </html>
