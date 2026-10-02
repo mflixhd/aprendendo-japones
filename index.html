@@ -358,7 +358,13 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
     },
     async signInGoogle() {
       const user = firebaseAuth.currentUser;
-      if (!user) throw new Error("Perfil Firebase ainda não está pronto.");
+      if (!user) {
+        const result = await signInWithPopup(firebaseAuth, googleProvider);
+        this.user = result.user;
+        this.uid = result.user.uid;
+        this.ready = true;
+        return result.user;
+      }
 
       if (!user.isAnonymous) {
         return user;
