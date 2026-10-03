@@ -530,7 +530,7 @@ async function hydrateFromFirebase(){
   if(!window.firebaseReady) return;
   await window.firebaseReady;
 
-  if(remoteHydrated || !window.firebaseSync || !window.firebaseSync.ready) return;
+  if(remoteHydrated || !window.firebaseSync?.ready) return;
   remoteHydrated = true;
   const user = window.firebaseSync.user;
   updateProfileUI(user);
