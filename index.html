@@ -511,7 +511,7 @@ async function loginWithGoogle(){
     window.firebaseRemoteState = null;
     await hydrateFromFirebase();
     updateProfileUI(user);
-    await window.firebaseSync.save(state);
+    //await window.firebaseSync.save(state);
     alert('Google conectado! ☁️ Seu progresso agora fica ligado à sua conta.');
   }catch(e){
     console.error(e);
