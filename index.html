@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aprendendo Japonês — V7.4</title>
+<title>Aprendendo Idiomas — V9.0</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
@@ -92,20 +92,104 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 .top{display:block}.progressBox{margin-top:20px}.kana,.kanaTableGrid{grid-template-columns:repeat(5,1fr)}
 }
 @media(max-width:500px){.options{grid-template-columns:1fr}.kana,.kanaTableGrid{grid-template-columns:repeat(5,1fr)}}
+
+.languageSelector{
+  position:fixed;inset:0;background:#0d1117;z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.languageSelector.hidden{display:none}
+.languageSelectorInner{width:min(900px,100%);text-align:center}
+.languageSelector h1{font-size:38px;margin:0 0 8px}
+.languageSelector p{color:#9ca3af;margin:0 0 28px}
+.languageGrid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:18px}
+.languageCard{
+  border:1px solid #334155;background:#151c27;color:#fff;border-radius:20px;
+  padding:28px 22px;text-align:left;cursor:pointer;transition:.18s;
+}
+.languageCard:hover{transform:translateY(-3px);border-color:#60a5fa;background:#1a2433}
+.languageFlag{font-size:54px;margin-bottom:12px}
+.languageName{font-size:24px;font-weight:800}
+.languageDesc{color:#94a3b8;font-size:14px;margin-top:6px}
+.languageBack{
+  display:none;border:1px solid #374151;background:#1f2937;color:#fff;
+  padding:8px 12px;border-radius:9px;font-weight:700;margin-bottom:12px;
+}
+.languageBack:hover{background:#263449}
+body.language-mode .languageSelector{display:none}
+body.language-mode .languageBack{display:block}
+.lang-vietnamese .sidebar .logo{font-size:21px}
+.vnAccent{background:#b91c1c}
+.vnAccent:hover{filter:brightness(1.1)}
+.vnLessonNote{
+  border-left:3px solid #60a5fa;padding-left:12px;color:#cbd5e1
+}
+@media(max-width:600px){
+  .languageSelector h1{font-size:30px}
+  .languageGrid{grid-template-columns:1fr}
+}
+
+
+<style>
+.speechPracticeCard{max-width:760px}
+.speechPracticeTarget{display:flex;flex-direction:column;gap:8px;text-align:center;padding:22px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);margin-bottom:18px}
+.speechPracticeTarget strong{font-size:34px;line-height:1.25}
+.speechLabel{font-size:11px;letter-spacing:.14em;font-weight:800;opacity:.7}
+.speechPracticeControls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.speechStatus{text-align:center;margin-top:18px;min-height:26px;font-weight:700}
+.speechResult{margin-top:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.04);text-align:center;min-height:24px}
+.speechNote{margin-top:16px;text-align:center;font-size:13px}
+.speechListening{animation:pulseSpeech 1s infinite}
+@keyframes pulseSpeech{50%{transform:scale(1.02);opacity:.72}}
+@media(max-width:600px){.speechPracticeTarget strong{font-size:27px}.speechPracticeControls .btn{width:100%}}
+</style>
+
 </style>
 </head>
 <body>
+
+<div class="languageSelector" id="languageSelector">
+  <div class="languageSelectorInner">
+    <div style="font-size:48px;margin-bottom:8px">🌎</div>
+    <h1>O que você quer aprender?</h1>
+    <p>Escolha um idioma para entrar no seu curso.</p>
+    <div class="languageGrid">
+      <button class="languageCard" type="button" onclick="selectLanguage('japanese')">
+        <div class="languageFlag">🇯🇵</div>
+        <div class="languageName">Japonês</div>
+        <div class="languageDesc">Hiragana, vocabulário, áudio, escrita e prática.</div>
+      </button>
+      <button class="languageCard" type="button" onclick="selectLanguage('vietnamese')">
+        <div class="languageFlag">🇻🇳</div>
+        <div class="languageName">Vietnamita</div>
+        <div class="languageDesc">Alfabeto, pronúncia, vocabulário, áudio e prática.</div>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 <aside class="sidebar">
-  <div class="logo">🇯🇵 Aprendendo Japonês</div>
-  <div class="sub">Seu curso, do zero ao anime.</div>
-  <div class="nav">
+  <button class="languageBack" type="button" onclick="backToLanguages()">← Trocar idioma</button>
+  <div class="logo" id="courseLogo">🇯🇵 Aprendendo Japonês</div>
+  <div class="sub" id="courseSub">Seu curso, do zero ao anime.</div>
+  <div class="nav" id="japaneseNav">
     <button class="active" data-page="home">🏠 Início</button>
     <button data-page="aula1">📚 Aula 1</button>
     <button data-page="hiragana">🈁 Hiragana</button>
     <button data-page="pratica">✍️ Prática de Escrita</button>
+    <button data-page="fala">🎙️ Prática de Fala</button>
     <button data-page="vocab">🧠 Vocabulário</button>
     <button data-page="progresso">📊 Progresso</button>
+    <button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Áudio</button>
+  </div>
+  <div class="nav" id="vietnameseNav" style="display:none">
+    <button class="active" data-page="vn-home">🏠 Início</button>
+    <button data-page="vn-aula1">📚 Aula 1</button>
+    <button data-page="vn-alfabeto">🔤 Alfabeto</button>
+    <button data-page="vn-pratica">✍️ Prática de Escrita</button>
+    <button data-page="vn-fala">🎙️ Prática de Fala</button>
+    <button data-page="vn-vocab">🧠 Vocabulário</button>
+    <button data-page="vn-progresso">📊 Progresso</button>
     <button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Áudio</button>
   </div>
 </aside>
@@ -143,7 +227,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 <main class="main">
   <section id="home" class="page">
     <div class="top">
-      <div><h1>Aprendendo Japonês</h1><div class="muted">V7.4 — progresso sincronizado na nuvem 🇯🇵</div></div>
+      <div><h1 id="homeTitle">Aprendendo Japonês</h1><div class="muted" id="homeSubtitle">V9.0 — progresso sincronizado na nuvem 🇯🇵</div></div>
       <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div><div class="small" id="profileStatus" style="margin-top:5px;color:#60a5fa">☁️ Conectando ao perfil...</div><button class="loginBtn" id="googleLoginBtn" type="button" onclick="loginWithGoogle()">🔐 Entrar com Google</button></div>
     </div>
     <div class="hero">
@@ -156,6 +240,149 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
       <div class="card"><div class="stat">5</div><div class="small">Hiragana iniciais</div></div>
       <div class="card"><div class="stat" id="knownCount">0</div><div class="small">Palavras aprendidas</div></div>
       <div class="card"><div class="stat" id="scoreHome">0%</div><div class="small">Aproveitamento do quiz</div></div>
+    </div>
+  </section>
+
+
+  <!-- CURSO VIETNAMITA: estrutura independente do curso japonês -->
+  <section id="vn-home" class="page lesson">
+    <div class="top">
+      <div><h1>Aprendendo Vietnamita 🇻🇳</h1><div class="muted">V8.0 — sua trilha de vietnamita</div></div>
+      <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="vnTopBar"></div></div><div class="small" id="vnTopPct">0%</div></div>
+    </div>
+    <div class="hero">
+      <span class="tag">AULA 1 DISPONÍVEL</span>
+      <h2>Os primeiros sons do vietnamita</h2>
+      <p class="muted">Vamos começar pelo alfabeto, pela pronúncia e pelos tons. A ideia é reconhecer → ouvir → usar.</p>
+      <div class="actions"><button class="btn" onclick="showPage('vn-aula1')">Começar Aula 1 →</button></div>
+    </div>
+    <div class="grid">
+      <div class="card"><div class="stat">29</div><div class="small">Letras do alfabeto vietnamita</div></div>
+      <div class="card"><div class="stat" id="vnKnownCount">0</div><div class="small">Palavras aprendidas</div></div>
+      <div class="card"><div class="stat" id="vnScoreHome">0%</div><div class="small">Aproveitamento do quiz</div></div>
+    </div>
+  </section>
+
+  <section id="vn-aula1" class="page lesson">
+    <div class="hero">
+      <span class="tag">AULA 1</span>
+      <h2>Como o vietnamita funciona</h2>
+      <p class="muted">Primeiro vamos reconhecer letras e sons. Depois entram os tons e as frases usadas nas conversas.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. As primeiras letras</h2>
+      <p>O vietnamita usa o alfabeto latino, mas possui letras e combinações próprias. Clique no cartão para ouvir.</p>
+      <div class="legend-box">
+        <span class="legend-item">⚪ <strong>Não iniciado</strong></span>
+        <span class="legend-item">🟡 <strong>Em estudo</strong></span>
+        <span class="legend-item">🟢 <strong>Aprendido / Dominado</strong></span>
+      </div>
+      <div class="kana" id="vnInitialList"></div>
+      <p class="muted" style="margin-top:12px">No começo, o objetivo é reconhecer o símbolo e associá-lo ao som.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>2. Palavras úteis para começar</h2>
+      <div class="word"><span><b>xin chào</b><br><span class="small">xin chào — olá</span></span><button class="audioBtn" onclick="speakVN('xin chào', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>cảm ơn</b><br><span class="small">cảm ơn — obrigado(a)</span></span><button class="audioBtn" onclick="speakVN('cảm ơn', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>xin lỗi</b><br><span class="small">xin lỗi — desculpa / com licença</span></span><button class="audioBtn" onclick="speakVN('xin lỗi', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>không</b><br><span class="small">không — não</span></span><button class="audioBtn" onclick="speakVN('không', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>được</b><br><span class="small">được — pode / está bem / conseguir</span></span><button class="audioBtn" onclick="speakVN('được', this)">🔊 Ouvir</button></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>3. Frase de hoje</h2>
+      <div class="example">
+        <div class="jpbig">Bạn khỏe không?</div>
+        <div class="romajiBig">Bạn khỏe không?</div>
+        <div class="translation">Você está bem?</div>
+        <button class="audioBtn" style="margin-top:12px" onclick="speakVN('Bạn khỏe không?', this)">🔊 Ouvir frase</button>
+      </div>
+      <p><b>khỏe</b> = bem / saudável.</p>
+      <p class="muted">Comece a reconhecer a frase inteira antes de tentar traduzir cada palavra.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>🔊 4. Treino de ouvido</h2>
+      <p>Ouça as palavras e tente reconhecer o som antes de olhar o significado.</p>
+      <div class="word"><span><b>xin chào</b><br><span class="small">olá</span></span><button class="audioBtn" onclick="speakVN('xin chào', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>cảm ơn</b><br><span class="small">obrigado(a)</span></span><button class="audioBtn" onclick="speakVN('cảm ơn', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>không</b><br><span class="small">não</span></span><button class="audioBtn" onclick="speakVN('không', this)">🔊 Ouvir</button></div>
+      <div class="example">
+        <div class="jpbig">Bạn khỏe không?</div>
+        <div class="translation">Você está bem?</div>
+        <button class="audioBtn" onclick="speakVN('Bạn khỏe không?', this)">🔊 Ouvir frase</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>5. Mini desafio</h2>
+      <div id="vnQuiz"></div>
+      <div class="actions"><button class="btn green" id="vnFinishBtn" onclick="finishVNLesson()">Concluir Aula 1</button></div>
+    </div>
+  </section>
+
+  <section id="vn-alfabeto" class="page lesson">
+    <div class="hero"><span class="tag">ESCRITA</span><h2>Alfabeto Vietnamita 📖</h2><p class="muted">Clique em uma letra para ouvir. Use o ícone para acompanhar o que você já reconhece.</p></div>
+    <div class="card">
+      <div class="legend-box" style="margin-bottom:15px">
+        <span class="legend-item">⚪ <strong>Não iniciado</strong></span>
+        <span class="legend-item">🟡 <strong>Em estudo</strong></span>
+        <span class="legend-item">🟢 <strong>Aprendido / Dominado</strong></span>
+      </div>
+      <div class="kanaTableGrid" id="vnAlphabetTable"></div>
+    </div>
+  </section>
+
+  <section id="vn-pratica" class="page lesson">
+    <div class="hero"><span class="tag">PRÁTICA</span><h2>Prática de Escrita ✍️</h2><p class="muted">Pratique as letras vietnamitas, reconheça seus sons e prepare a pronúncia. A prática de traçado poderá ser expandida nas próximas aulas.</p></div>
+    <div class="card">
+      <h3>Treino rápido</h3>
+      <p class="vnLessonNote">Escolha uma letra no alfabeto, ouça o som, diga em voz alta e tente escrevê-la no papel.</p>
+    </div>
+  </section>
+
+  <section id="vn-fala" class="page lesson">
+    <div class="hero">
+      <span class="tag">PRÁTICA DE FALA</span>
+      <h2>Prática de Fala 🎙️</h2>
+      <p class="muted">Ouça, fale em vietnamita e deixe o navegador comparar o que você disse com a frase-alvo.</p>
+    </div>
+    <div class="card speechPracticeCard">
+      <div class="speechPracticeTarget">
+        <span class="speechLabel">FRASE-ALVO</span>
+        <strong id="vnSpeechTarget">Bạn khỏe không?</strong>
+        <span id="vnSpeechMeaning" class="muted">Você está bem?</span>
+      </div>
+      <div class="speechPracticeControls">
+        <button class="btn secondary" onclick="speakVNSpeechTarget()">🔊 Ouvir</button>
+        <button class="btn green" id="vnSpeechStartBtn" onclick="startVNSpeechPractice()">🎙️ Falar agora</button>
+        <button class="btn secondary" onclick="nextVNSpeechTarget()">➡️ Próxima</button>
+      </div>
+      <div id="vnSpeechStatus" class="speechStatus">Clique em “Falar agora” e diga a frase em vietnamita.</div>
+      <div id="vnSpeechResult" class="speechResult"></div>
+      <p class="muted speechNote">O reconhecimento de voz depende do navegador e do microfone. O objetivo aqui é treinar sua fala, não exigir pronúncia perfeita de primeira.</p>
+    </div>
+  </section>
+
+  <section id="vn-vocab" class="page lesson">
+    <div class="hero"><span class="tag">VOCABULÁRIO</span><h2>Palavras da Aula 1</h2><p class="muted">Poucas palavras, priorizando conversas reais.</p></div>
+    <div class="card">
+      <div class="word"><span><b>xin chào</b> — olá</span><button class="audioBtn" onclick="speakVN('xin chào', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>cảm ơn</b> — obrigado(a)</span><button class="audioBtn" onclick="speakVN('cảm ơn', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>xin lỗi</b> — desculpa</span><button class="audioBtn" onclick="speakVN('xin lỗi', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>không</b> — não</span><button class="audioBtn" onclick="speakVN('không', this)">🔊 Ouvir</button></div>
+      <div class="word"><span><b>khỏe</b> — bem / saudável</span><button class="audioBtn" onclick="speakVN('khỏe', this)">🔊 Ouvir</button></div>
+    </div>
+  </section>
+
+  <section id="vn-progresso" class="page lesson">
+    <div class="hero"><span class="tag">SEU PROGRESSO</span><h2>Vietnamita: sem pressão. Só evolução.</h2><p class="muted">O progresso do vietnamita fica separado do japonês.</p></div>
+    <div class="grid">
+      <div class="card"><div class="stat" id="vnScoreProgress">0%</div><div class="small">Quiz da Aula 1</div></div>
+      <div class="card"><div class="stat" id="vnLessonStatus">Não concluída</div><div class="small">Aula 1</div></div>
+      <div class="card"><div class="stat" id="vnLearnedCount">0/29</div><div class="small">Letras dominadas (🟢)</div></div>
     </div>
   </section>
 
@@ -285,6 +512,29 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
     </div>
   </section>
 
+  <section id="fala" class="page lesson">
+    <div class="hero">
+      <span class="tag">PRÁTICA DE FALA</span>
+      <h2>Prática de Fala 🎙️</h2>
+      <p class="muted">Ouça, fale em japonês e deixe o navegador comparar o que você disse com a frase-alvo.</p>
+    </div>
+    <div class="card speechPracticeCard">
+      <div class="speechPracticeTarget">
+        <span class="speechLabel">FRASE-ALVO</span>
+        <strong id="jpSpeechTarget">おはよう</strong>
+        <span id="jpSpeechMeaning" class="muted">Bom dia.</span>
+      </div>
+      <div class="speechPracticeControls">
+        <button class="btn secondary" onclick="speakJPSpeechTarget()">🔊 Ouvir</button>
+        <button class="btn green" id="jpSpeechStartBtn" onclick="startJPSpeechPractice()">🎙️ Falar agora</button>
+        <button class="btn secondary" onclick="nextJPSpeechTarget()">➡️ Próxima</button>
+      </div>
+      <div id="jpSpeechStatus" class="speechStatus">Clique em “Falar agora” e diga a frase em japonês.</div>
+      <div id="jpSpeechResult" class="speechResult"></div>
+      <p class="muted speechNote">O reconhecimento de voz depende do navegador e do microfone. O objetivo aqui é treinar sua fala, não exigir pronúncia perfeita de primeira.</p>
+    </div>
+  </section>
+
   <section id="vocab" class="page lesson">
     <div class="hero"><span class="tag">VOCABULÁRIO</span><h2>Palavras da Aula 1</h2><p class="muted">Poucas palavras, mas usadas de verdade.</p></div>
     <div class="card">
@@ -340,18 +590,22 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
     uid: null,
     ready: false,
     user: null,
-    async save(state) {
+    async save(state, vnStateOverride = null) {
       if (!this.uid) return;
       try {
-        await setDoc(doc(firebaseDb, "users", this.uid), {
-          score: state.score,
-          answered: state.answered,
-          correct: state.correct,
-          lessonDone: state.lessonDone,
-          kanaStatus: state.kanaStatus || {},
-          speechRate: state.speechRate || 0.7,
+        const payload = {
+          japanese: {
+            score: state.score,
+            answered: state.answered,
+            correct: state.correct,
+            lessonDone: state.lessonDone,
+            kanaStatus: state.kanaStatus || {},
+            speechRate: state.speechRate || 0.7
+          },
+          vietnamese: vnStateOverride || window.vnState || null,
           updatedAt: Date.now()
-        });
+        };
+        await setDoc(doc(firebaseDb, "users", this.uid), payload);
       } catch (e) {
         console.warn("Falha ao sincronizar com o Firebase.", e);
       }
@@ -403,21 +657,7 @@ canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;
 
       window.firebaseSync.user = user;
       window.firebaseSync.uid = user.uid;
-      try {
-        const ref = doc(firebaseDb, "users", user.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          window.firebaseRemoteState = snap.data();
-          window.firebaseRemoteStateLoaded = true;
-        } else {
-          window.firebaseRemoteState = null;
-          window.firebaseRemoteStateLoaded = true;
-        }
-      } catch (e) {
-        console.warn("Falha ao carregar o progresso do Firebase.", e);
-        window.firebaseRemoteState = null;
-        window.firebaseRemoteStateLoaded = true;
-      }
+      await loadRemoteStateForCurrentUser();
 
       window.firebaseSync.ready = true;
       if (!resolved) { resolved = true; resolve(user); }
@@ -444,6 +684,23 @@ const allHiragana = [
 
 const SAVE_KEY = 'japonesComChatGPT_save';
 const defaultState = {score:0,answered:0,correct:0,lessonDone:false,kanaStatus:{},speechRate:0.7};
+
+async function loadRemoteStateForCurrentUser(){
+  if(!window.firebaseSync?.uid) return null;
+  try{
+    const ref = doc(firebaseDb, "users", window.firebaseSync.uid);
+    const snap = await getDoc(ref);
+    window.firebaseRemoteState = snap.exists() ? snap.data() : null;
+    window.firebaseRemoteStateLoaded = true;
+    return window.firebaseRemoteState;
+  }catch(e){
+    console.warn("Falha ao carregar o progresso do Firebase.", e);
+    window.firebaseRemoteState = null;
+    window.firebaseRemoteStateLoaded = true;
+    return null;
+  }
+}
+
 
 function loadState(){
   try{
@@ -476,7 +733,7 @@ function save(){
 
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    if(window.firebaseSync?.ready) window.firebaseSync.save(state);
+    if(window.firebaseSync?.ready && window.firebaseSync.user && !window.firebaseSync.user.isAnonymous) saveAllToCloud();
   }, 250);
 }
 
@@ -509,9 +766,11 @@ async function loginWithGoogle(){
     const user = await window.firebaseSync.signInGoogle();
     remoteHydrated = false;
     window.firebaseRemoteState = null;
+    window.firebaseRemoteStateLoaded = false;
+    await loadRemoteStateForCurrentUser();
     await hydrateFromFirebase();
     updateProfileUI(user);
-    await window.firebaseSync.save(state);
+    await saveAllToCloud();
     alert('Google conectado! ☁️ Seu progresso agora fica ligado à sua conta.');
   }catch(e){
     console.error(e);
@@ -532,28 +791,50 @@ async function hydrateFromFirebase(){
 
   if(remoteHydrated || !window.firebaseSync?.ready) return;
   remoteHydrated = true;
+
   const user = window.firebaseSync.user;
   updateProfileUI(user);
 
   const remote = window.firebaseRemoteState;
   if(remote){
+    // V9: a conta Google é a fonte principal quando existe save na nuvem.
+    const jp = remote.japanese || remote;
     Object.assign(state, {
-      score: remote.score ?? state.score,
-      answered: remote.answered ?? state.answered,
-      correct: remote.correct ?? state.correct,
-      lessonDone: remote.lessonDone ?? state.lessonDone,
-      kanaStatus: remote.kanaStatus ?? state.kanaStatus,
-      speechRate: remote.speechRate ?? state.speechRate
+      score: jp.score ?? 0,
+      answered: jp.answered ?? 0,
+      correct: jp.correct ?? 0,
+      lessonDone: jp.lessonDone ?? false,
+      kanaStatus: jp.kanaStatus ?? {},
+      speechRate: jp.speechRate ?? state.speechRate
     });
+
+    if(remote.vietnamese){
+      Object.assign(vnState, {
+        score: remote.vietnamese.score ?? vnState.score,
+        answered: remote.vietnamese.answered ?? vnState.answered,
+        correct: remote.vietnamese.correct ?? vnState.correct,
+        lessonDone: remote.vietnamese.lessonDone ?? vnState.lessonDone,
+        letterStatus: remote.vietnamese.letterStatus ?? vnState.letterStatus
+      });
+      try{ localStorage.setItem(VN_SAVE_KEY, JSON.stringify(vnState)); }catch(e){}
+    }
+
     speechRate = Number(state.speechRate) || 0.7;
     try{ localStorage.setItem(SAVE_KEY,JSON.stringify(state)); }catch(e){}
     updateUI();
+    updateVNUI();
     updateSpeedUI();
     renderKanaTables();
-  }else{
-    window.firebaseSync.save(state);
+    renderVNAlphabet();
   }
 }
+
+async function saveAllToCloud(){
+  if(window.firebaseSync?.ready && window.firebaseSync?.user && !window.firebaseSync.user.isAnonymous){
+    await window.firebaseSync.save(state, vnState);
+  }
+}
+
 function updateUI(){
   const pct=state.answered?Math.round(state.correct/state.answered*100):0;
   document.getElementById('topBar').style.width=pct+'%';
@@ -568,10 +849,160 @@ function updateUI(){
   document.getElementById('learnedKanaCount').textContent = greenCount + '/46';
 }
 
+
+const vietnameseAlphabet = [
+  {ch:'A',r:'a'},{ch:'Ă',r:'ă'},{ch:'Â',r:'â'},{ch:'B',r:'b'},{ch:'C',r:'c'},
+  {ch:'D',r:'d'},{ch:'Đ',r:'đ'},{ch:'E',r:'e'},{ch:'Ê',r:'ê'},{ch:'G',r:'g'},
+  {ch:'H',r:'h'},{ch:'I',r:'i'},{ch:'K',r:'k'},{ch:'L',r:'l'},{ch:'M',r:'m'},
+  {ch:'N',r:'n'},{ch:'O',r:'o'},{ch:'Ô',r:'ô'},{ch:'Ơ',r:'ơ'},{ch:'P',r:'p'},
+  {ch:'Q',r:'q'},{ch:'R',r:'r'},{ch:'S',r:'s'},{ch:'T',r:'t'},{ch:'U',r:'u'},
+  {ch:'Ư',r:'ư'},{ch:'V',r:'v'},{ch:'X',r:'x'},{ch:'Y',r:'y'}
+];
+const vnInitialLetters = vietnameseAlphabet.slice(0,5);
+const VN_SAVE_KEY = 'vietnamitaComChatGPT_save';
+const vnDefaultState = {score:0,answered:0,correct:0,lessonDone:false,letterStatus:{}};
+let vnState = loadVNState();
+window.vnState = vnState;
+
+function loadVNState(){
+  try{
+    const raw = localStorage.getItem(VN_SAVE_KEY);
+    return raw ? {...vnDefaultState,...JSON.parse(raw)} : {...vnDefaultState};
+  }catch(e){ return {...vnDefaultState}; }
+}
+function saveVNState(){
+  try{ localStorage.setItem(VN_SAVE_KEY, JSON.stringify(vnState)); }catch(e){}
+  updateVNUI();
+  if(window.firebaseSync?.ready && window.firebaseSync.user && !window.firebaseSync.user.isAnonymous) saveAllToCloud();
+}
+function getVietnameseVoice(){
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  const viVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('vi'));
+  return viVoices.find(v=>/vi-vn/i.test(v.lang)) || viVoices[0] || null;
+}
+function speakVN(text, button){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.getVoices();
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = getVietnameseVoice();
+  if(voice){ utter.voice=voice; utter.lang=voice.lang; }
+  else utter.lang='vi-VN';
+  utter.rate = speechRate;
+  utter.pitch = 1;
+  window.speechSynthesis.speak(utter);
+}
+function cycleVNStatus(char,e){
+  if(e) e.stopPropagation();
+  const current = vnState.letterStatus[char] || '⚪';
+  const next = current==='⚪'?'🟡':current==='🟡'?'🟢':'⚪';
+  vnState.letterStatus[char]=next;
+  saveVNState();
+  renderVNAlphabet();
+}
+function createVNLetterCard(item){
+  const status = vnState.letterStatus[item.ch] || '⚪';
+  const box=document.createElement('div');
+  box.className='kanaBox';
+  box.onclick=()=>speakVN(item.ch);
+  box.innerHTML=`
+    <button type="button" class="status-btn" onclick="cycleVNStatus('${item.ch}',event)">${status}</button>
+    <div class="jp">${item.ch}</div>
+    <div class="romaji">${item.r}</div>`;
+  return box;
+}
+function renderVNAlphabet(){
+  const initial=document.getElementById('vnInitialList');
+  if(initial){
+    initial.innerHTML='';
+    vnInitialLetters.forEach(item=>initial.appendChild(createVNLetterCard(item)));
+  }
+  const table=document.getElementById('vnAlphabetTable');
+  if(table){
+    table.innerHTML='';
+    vietnameseAlphabet.forEach(item=>table.appendChild(createVNLetterCard(item)));
+  }
+}
+function renderVNQuiz(){
+  const el=document.getElementById('vnQuiz');
+  if(!el || el.dataset.rendered) return;
+  el.dataset.rendered='1';
+  const data=[
+    {q:'O que significa “cảm ơn”?',options:['Obrigado(a)','Olá','Desculpa','Não'],a:0,target:'cảm ơn'},
+    {q:'“xin chào” significa...',options:['Obrigado(a)','Olá','Tudo bem?','Não'],a:1,target:'xin chào'},
+    {q:'O que significa “không”?',options:['Sim','Olá','Não','Obrigado'],a:2,target:'không'}
+  ];
+  data.forEach((item,i)=>{
+    const box=document.createElement('div'); box.className='question';
+    box.innerHTML=`<div class="q-title"><span>${i+1}. ${item.q}</span><button class="audioBtn">🔊 Ouvir</button></div><div class="options"></div><div class="feedback"></div>`;
+    box.querySelector('.audioBtn').onclick=()=>speakVN(item.target);
+    const opts=box.querySelector('.options'), fb=box.querySelector('.feedback');
+    item.options.forEach((op,j)=>{
+      const row=document.createElement('div'); row.className='option';
+      const txt=document.createElement('span'); txt.className='optionText'; txt.textContent=op;
+      row.appendChild(txt);
+      row.onclick=()=>{
+        if(row.dataset.done) return;
+        row.dataset.done='1'; vnState.answered++;
+        if(j===item.a){row.classList.add('correct');fb.textContent='✅ Mandou bem!';vnState.correct++;}
+        else{row.classList.add('wrong');fb.textContent='❌ Quase! A resposta é: '+item.options[item.a];opts.children[item.a].classList.add('correct');}
+        saveVNState();
+      };
+      opts.appendChild(row);
+    });
+    el.appendChild(box);
+  });
+}
+function updateVNUI(){
+  const pct=vnState.answered?Math.round(vnState.correct/vnState.answered*100):0;
+  const bar=document.getElementById('vnTopBar'), topPct=document.getElementById('vnTopPct');
+  if(bar) bar.style.width=pct+'%';
+  if(topPct) topPct.textContent=pct+'%';
+  const scoreHome=document.getElementById('vnScoreHome'), scoreProgress=document.getElementById('vnScoreProgress');
+  if(scoreHome) scoreHome.textContent=pct+'%';
+  if(scoreProgress) scoreProgress.textContent=pct+'%';
+  const status=document.getElementById('vnLessonStatus');
+  if(status) status.textContent=vnState.lessonDone?'Concluída':'Não concluída';
+  const green=Object.values(vnState.letterStatus).filter(v=>v==='🟢').length;
+  const learned=document.getElementById('vnLearnedCount');
+  if(learned) learned.textContent=green+'/29';
+  const known=document.getElementById('vnKnownCount');
+  if(known) known.textContent='5';
+}
+function finishVNLesson(){
+  const total=3;
+  if(vnState.answered<total){alert('Falta responder alguma questão. Faz o mini desafio primeiro 😎');return;}
+  vnState.lessonDone=true;saveVNState();
+  alert('Aula 1 concluída! 🇻🇳 Agora você já tem a primeira base.');
+  showPage('vn-progresso');
+}
+function selectLanguage(language){
+  document.body.classList.add('language-mode');
+  try{ localStorage.setItem('idiomaSelecionado', language); }catch(e){}
+  document.getElementById('languageSelector').classList.add('hidden');
+  const isVN=language==='vietnamese';
+  document.body.classList.toggle('lang-vietnamese',isVN);
+  document.getElementById('japaneseNav').style.display=isVN?'none':'block';
+  document.getElementById('vietnameseNav').style.display=isVN?'block':'none';
+  document.getElementById('courseLogo').textContent=isVN?'🇻🇳 Aprendendo Vietnamita':'🇯🇵 Aprendendo Japonês';
+  document.getElementById('courseSub').textContent=isVN?'Seu curso, focado em conversas reais.':'Seu curso, do zero ao anime.';
+  document.getElementById('homeTitle').textContent=isVN?'Aprendendo Vietnamita':'Aprendendo Japonês';
+  document.getElementById('homeSubtitle').textContent=isVN?'V9.0 — trilha de vietnamita 🇻🇳':'V9.0 — progresso sincronizado na nuvem 🇯🇵';
+  showPage(isVN?'vn-home':'home');
+}
+function backToLanguages(){
+  document.body.classList.remove('language-mode','lang-vietnamese');
+  try{ localStorage.removeItem('idiomaSelecionado'); }catch(e){}
+  document.getElementById('languageSelector').classList.remove('hidden');
+}
+
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.style.display='none');
-  document.getElementById(id).style.display='block';
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  const page=document.getElementById(id);
+  if(page) page.style.display='block';
+  const activeNav = id.startsWith('vn-') ? document.getElementById('vietnameseNav') : document.getElementById('japaneseNav');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  activeNav?.querySelectorAll('button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   window.scrollTo({top:0,behavior:'smooth'});
   if(id === 'pratica') { updateCanvasGuide(); }
 }
@@ -915,8 +1346,151 @@ function speakCurrentDrawChar() {
   speakJP(selectedChar);
 }
 
-if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>getJapaneseVoice(); }
-renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI(); updateSpeedUI();
+
+// =========================
+// V9 — PRÁTICA DE FALA
+// =========================
+const jpSpeechData = [
+  {text:'おはよう', meaning:'Bom dia.'},
+  {text:'ありがとう', meaning:'Obrigado(a).'},
+  {text:'元気です', meaning:'Estou bem.'},
+  {text:'大丈夫です', meaning:'Está tudo bem.'},
+  {text:'おはよう。元気？', meaning:'Bom dia. Tudo bem?'}
+];
+
+const vnSpeechData = [
+  {text:'Xin chào', meaning:'Olá.'},
+  {text:'Cảm ơn', meaning:'Obrigado(a).'},
+  {text:'Bạn khỏe không?', meaning:'Você está bem?'},
+  {text:'Tôi khỏe', meaning:'Estou bem.'},
+  {text:'Xin lỗi', meaning:'Desculpa.'}
+];
+
+let jpSpeechIndex = 0;
+let vnSpeechIndex = 0;
+let activeRecognition = null;
+
+function normalizeSpeechText(text, language){
+  return String(text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[.,!?¿¡「」『』。、？！]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function speechSimilarity(a,b){
+  const aa=normalizeSpeechText(a), bb=normalizeSpeechText(b);
+  if(!aa || !bb) return 0;
+  if(aa===bb) return 1;
+  const max=Math.max(aa.length,bb.length), min=Math.min(aa.length,bb.length);
+  let same=0;
+  const used=new Set();
+  for(let i=0;i<aa.length;i++){
+    const idx=bb.indexOf(aa[i], Math.max(0,i-1));
+    if(idx>=0 && !used.has(idx)){same++;used.add(idx);}
+  }
+  return Math.max(0, Math.min(1, same/max + (min/max)*0.25));
+}
+
+function getSpeechRecognition(){
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function renderSpeechTarget(kind){
+  const data = kind==='jp' ? jpSpeechData[jpSpeechIndex] : vnSpeechData[vnSpeechIndex];
+  document.getElementById(kind==='jp'?'jpSpeechTarget':'vnSpeechTarget').textContent=data.text;
+  document.getElementById(kind==='jp'?'jpSpeechMeaning':'vnSpeechMeaning').textContent=data.meaning;
+  document.getElementById(kind==='jp'?'jpSpeechResult':'vnSpeechResult').textContent='';
+  document.getElementById(kind==='jp'?'jpSpeechStatus':'vnSpeechStatus').textContent='Clique em “Falar agora” e diga a frase-alvo.';
+}
+
+function startSpeechPractice(kind){
+  const Recognition = getSpeechRecognition();
+  const status = document.getElementById(kind==='jp'?'jpSpeechStatus':'vnSpeechStatus');
+  const resultEl = document.getElementById(kind==='jp'?'jpSpeechResult':'vnSpeechResult');
+  const btn = document.getElementById(kind==='jp'?'jpSpeechStartBtn':'vnSpeechStartBtn');
+  const data = kind==='jp' ? jpSpeechData[jpSpeechIndex] : vnSpeechData[vnSpeechIndex];
+
+  if(!Recognition){
+    status.textContent='⚠️ Seu navegador não oferece reconhecimento de voz nesta versão. Tente usar Chrome no celular ou computador.';
+    return;
+  }
+
+  if(activeRecognition){ try{activeRecognition.stop();}catch(e){} }
+  const recognition = new Recognition();
+  activeRecognition = recognition;
+  recognition.lang = kind==='jp' ? 'ja-JP' : 'vi-VN';
+  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.maxAlternatives = 3;
+
+  btn.disabled = true;
+  btn.classList.add('speechListening');
+  status.textContent='🎙️ Estou ouvindo... fale agora!';
+  resultEl.textContent='';
+
+  recognition.onresult = (event)=>{
+    const alternatives = Array.from(event.results[0] || []).map(x=>x.transcript);
+    const transcript = alternatives[0] || '';
+    const score = Math.max(...alternatives.map(x=>speechSimilarity(x,data.text)));
+    const percent = Math.round(score*100);
+    resultEl.innerHTML = `<strong>Você falou:</strong> ${transcript}<br><span>${percent>=72?'🟢 Muito bom!':'🟡 Chegou perto!'} — correspondência aproximada: ${percent}%</span>`;
+    status.textContent = percent>=72
+      ? '🎉 Boa! Repita mais uma vez para fixar.'
+      : '💪 Não tem problema. Ouça de novo e tente falar mais devagar.';
+  };
+
+  recognition.onerror = (event)=>{
+    const messages = {
+      'not-allowed':'🚫 Permissão de microfone bloqueada.',
+      'no-speech':'🤫 Não detectei fala. Tente novamente.',
+      'audio-capture':'🎙️ Não encontrei um microfone disponível.',
+      'network':'🌐 O reconhecimento de voz não conseguiu conectar.'
+    };
+    status.textContent = messages[event.error] || '⚠️ Não consegui reconhecer sua fala. Tente novamente.';
+  };
+
+  recognition.onend = ()=>{
+    btn.disabled = false;
+    btn.classList.remove('speechListening');
+    activeRecognition = null;
+  };
+
+  try{ recognition.start(); }
+  catch(e){
+    btn.disabled=false;
+    btn.classList.remove('speechListening');
+    activeRecognition=null;
+    status.textContent='⚠️ O microfone não pôde ser iniciado. Tente novamente.';
+  }
+}
+
+function startJPSpeechPractice(){ startSpeechPractice('jp'); }
+function startVNSpeechPractice(){ startSpeechPractice('vn'); }
+
+function speakJPSpeechTarget(){
+  const data=jpSpeechData[jpSpeechIndex];
+  speakJP(data.text);
+}
+function speakVNSpeechTarget(){
+  const data=vnSpeechData[vnSpeechIndex];
+  speakVN(data.text);
+}
+function nextJPSpeechTarget(){
+  jpSpeechIndex=(jpSpeechIndex+1)%jpSpeechData.length;
+  renderSpeechTarget('jp');
+  speakJPSpeechTarget();
+}
+function nextVNSpeechTarget(){
+  vnSpeechIndex=(vnSpeechIndex+1)%vnSpeechData.length;
+  renderSpeechTarget('vn');
+  speakVNSpeechTarget();
+}
+
+if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>{getJapaneseVoice();getVietnameseVoice();}; }
+renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI(); updateSpeedUI(); renderVNAlphabet(); renderVNQuiz(); updateVNUI(); renderSpeechTarget('jp'); renderSpeechTarget('vn');
 hydrateFromFirebase();
 </script>
 </body>
