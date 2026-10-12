@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aprendendo Idiomas — V9.0</title>
+<title>Aprendendo Idiomas — V11.1</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0d1117;color:#f3f4f6}
@@ -49,6 +49,7 @@ button{font:inherit;cursor:pointer}
 h1{font-size:30px;margin:0 0 5px}.muted{color:#9ca3af}
 .progressBox{min-width:220px}.progress{height:9px;background:#1f2937;border-radius:99px;overflow:hidden}.bar{height:100%;background:#22c55e;width:0%;transition:.3s}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.lessonCard{display:flex;flex-direction:column;gap:10px;min-height:190px}.lessonCard h3{margin:0;font-size:20px}.lessonCard p{margin:0;color:#9ca3af;line-height:1.5}.lessonCard .actions{margin-top:auto}.lessonCard.locked{opacity:.78}.lessonStatus{font-size:12px;font-weight:700;color:#93c5fd}
 .card{background:#151c27;border:1px solid #293548;border-radius:16px;padding:20px;box-shadow:0 8px 30px #0002}
 .card h2,.card h3{margin-top:0}.tag{display:inline-block;padding:5px 9px;border-radius:99px;background:#1d4ed8;color:white;font-size:12px;margin-bottom:12px}
 .lesson{display:none}.lesson.active{display:block}
@@ -76,7 +77,7 @@ h1{font-size:30px;margin:0 0 5px}.muted{color:#9ca3af}
 .audioBtn{background:#1e293b;border:1px solid #475569;color:#f8fafc;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}.audioBtn:hover{background:#334155}
 .audioPanel{margin-top:15px;display:flex;align-items:center;gap:10px}.speedBtn{background:#1f2937;border:1px solid #374151;color:#fff;padding:6px 10px;border-radius:8px}.speedBtn.active{background:#2563eb;border-color:#60a5fa}
 .drawContainer{display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:15px}
-canvas{background:#000;border:3px dashed #475569;border-radius:12px;cursor:crosshair;touch-action:none;transition:border-color 0.3s, background-color 0.3s}
+canvas{background:#000;border:3px dashed #475569;border-radius:12px;cursor:crosshair;touch-action:none;max-width:100%;height:auto;transition:border-color 0.3s, background-color 0.3s}
 canvas.draw-correct{border-color:#22c55e !important;border-style:solid !important;background-color:#052e16 !important}
 canvas.draw-wrong{border-color:#ef4444 !important;border-style:solid !important;background-color:#450a0a !important}
 .drawTools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -163,6 +164,16 @@ body.language-mode .languageBack{display:block}
         <div class="languageName">Vietnamita</div>
         <div class="languageDesc">Alfabeto, pronúncia, vocabulário, áudio e prática.</div>
       </button>
+      <button class="languageCard" type="button" onclick="selectLanguage('chinese')">
+        <div class="languageFlag">🇨🇳</div>
+        <div class="languageName">Chinês (mandarim)</div>
+        <div class="languageDesc">Pinyin, tons, vocabulário, áudio e prática.</div>
+      </button>
+      <button class="languageCard" type="button" onclick="selectLanguage('thai')">
+        <div class="languageFlag">🇹🇭</div>
+        <div class="languageName">Tailandês</div>
+        <div class="languageDesc">Sons, escrita, vocabulário, áudio e prática.</div>
+      </button>
     </div>
   </div>
 </div>
@@ -174,7 +185,7 @@ body.language-mode .languageBack{display:block}
   <div class="sub" id="courseSub">Seu curso, do zero ao anime.</div>
   <div class="nav" id="japaneseNav">
     <button class="active" data-page="home">🏠 Início</button>
-    <button data-page="aula1">📚 Aula 1</button>
+    <button data-page="aulas">📚 Aulas</button>
     <button data-page="hiragana">🈁 Hiragana</button>
     <button data-page="pratica">✍️ Prática de Escrita</button>
     <button data-page="fala">🎙️ Prática de Fala</button>
@@ -184,13 +195,19 @@ body.language-mode .languageBack{display:block}
   </div>
   <div class="nav" id="vietnameseNav" style="display:none">
     <button class="active" data-page="vn-home">🏠 Início</button>
-    <button data-page="vn-aula1">📚 Aula 1</button>
+    <button data-page="vn-aulas">📚 Aulas</button>
     <button data-page="vn-alfabeto">🔤 Alfabeto</button>
     <button data-page="vn-pratica">✍️ Prática de Escrita</button>
     <button data-page="vn-fala">🎙️ Prática de Fala</button>
     <button data-page="vn-vocab">🧠 Vocabulário</button>
     <button data-page="vn-progresso">📊 Progresso</button>
     <button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Áudio</button>
+  </div>
+  <div class="nav" id="chineseNav" style="display:none">
+    <button class="active" data-page="zh-home">🏠 Início</button><button data-page="zh-aulas">📚 Aulas</button><button data-page="zh-pratica">✍️ Prática de Escrita</button><button data-page="zh-fala">🎙️ Prática de Fala</button><button data-page="zh-vocab">🧠 Vocabulário</button><button data-page="zh-progresso">📊 Progresso</button><button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Áudio</button>
+  </div>
+  <div class="nav" id="thaiNav" style="display:none">
+    <button class="active" data-page="th-home">🏠 Início</button><button data-page="th-aulas">📚 Aulas</button><button data-page="th-pratica">✍️ Prática de Escrita</button><button data-page="th-fala">🎙️ Prática de Fala</button><button data-page="th-vocab">🧠 Vocabulário</button><button data-page="th-progresso">📊 Progresso</button><button class="audioCategoryBtn" type="button" onclick="openAudioModal()">🔊 Áudio</button>
   </div>
 </aside>
 
@@ -227,14 +244,14 @@ body.language-mode .languageBack{display:block}
 <main class="main">
   <section id="home" class="page">
     <div class="top">
-      <div><h1 id="homeTitle">Aprendendo Japonês</h1><div class="muted" id="homeSubtitle">V9.0 — progresso sincronizado na nuvem 🇯🇵</div></div>
+      <div><h1 id="homeTitle">Aprendendo Japonês</h1><div class="muted" id="homeSubtitle">V11.1 — progresso sincronizado na nuvem 🇯🇵</div></div>
       <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="topBar"></div></div><div class="small" id="topPct">0%</div><div class="small" id="profileStatus" style="margin-top:5px;color:#60a5fa">☁️ Conectando ao perfil...</div><button class="loginBtn" id="googleLoginBtn" type="button" onclick="loginWithGoogle()">🔐 Entrar com Google</button></div>
     </div>
     <div class="hero">
       <span class="tag">AULA 1 DISPONÍVEL</span>
       <h2>Como o japonês funciona</h2>
       <p class="muted">Você vai começar pelos sons básicos, reconhecer algumas palavras e conhecer os primeiros hiragana. Sem decorar uma montanha de coisa.</p>
-      <div class="actions"><button class="btn" onclick="showPage('aula1')">Começar Aula 1 →</button></div>
+      <div class="actions"><button class="btn" onclick="showPage('aulas')">Ver aulas →</button></div>
     </div>
     <div class="grid">
       <div class="card"><div class="stat">5</div><div class="small">Hiragana iniciais</div></div>
@@ -247,19 +264,29 @@ body.language-mode .languageBack{display:block}
   <!-- CURSO VIETNAMITA: estrutura independente do curso japonês -->
   <section id="vn-home" class="page lesson">
     <div class="top">
-      <div><h1>Aprendendo Vietnamita 🇻🇳</h1><div class="muted">V8.0 — sua trilha de vietnamita</div></div>
+      <div><h1>Aprendendo Vietnamita 🇻🇳</h1><div class="muted">V11.1 — sua trilha de vietnamita</div></div>
       <div class="progressBox"><div class="small">Progresso da Aula 1</div><div class="progress"><div class="bar" id="vnTopBar"></div></div><div class="small" id="vnTopPct">0%</div></div>
     </div>
     <div class="hero">
       <span class="tag">AULA 1 DISPONÍVEL</span>
       <h2>Os primeiros sons do vietnamita</h2>
       <p class="muted">Vamos começar pelo alfabeto, pela pronúncia e pelos tons. A ideia é reconhecer → ouvir → usar.</p>
-      <div class="actions"><button class="btn" onclick="showPage('vn-aula1')">Começar Aula 1 →</button></div>
+      <div class="actions"><button class="btn" onclick="showPage('vn-aulas')">Ver aulas →</button></div>
     </div>
     <div class="grid">
       <div class="card"><div class="stat">29</div><div class="small">Letras do alfabeto vietnamita</div></div>
       <div class="card"><div class="stat" id="vnKnownCount">0</div><div class="small">Palavras aprendidas</div></div>
       <div class="card"><div class="stat" id="vnScoreHome">0%</div><div class="small">Aproveitamento do quiz</div></div>
+    </div>
+  </section>
+
+  <section id="vn-aulas" class="page lesson">
+    <div class="hero"><span class="tag">TRILHA DE APRENDIZADO</span><h2>Suas aulas de vietnamita 🇻🇳</h2><p class="muted">Escolha uma aula para continuar. A Aula 1 já está disponível; as próximas serão liberadas conforme o curso for desenvolvido.</p></div>
+    <div class="grid">
+      <div class="card lessonCard"><span class="lessonStatus">🟢 DISPONÍVEL</span><h3>Aula 1 — Os primeiros sons</h3><p>Conheça as letras do vietnamita e comece a explorar os sons e os tons da língua.</p><div class="actions"><button class="btn" onclick="showPage('vn-aula1')">Abrir Aula 1 →</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 2 — Letras e sons</h3><p>Consolidar o alfabeto e praticar a relação entre letras e pronúncia.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 3 — Tons e palavras</h3><p>Começar a distinguir os tons e reconhecer palavras úteis em conversas.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 4 — Primeiras frases</h3><p>Usar palavras conhecidas em expressões e frases curtas do cotidiano.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
     </div>
   </section>
 
@@ -332,6 +359,7 @@ body.language-mode .languageBack{display:block}
         <span class="legend-item">🟢 <strong>Aprendido / Dominado</strong></span>
       </div>
       <div class="kanaTableGrid" id="vnAlphabetTable"></div>
+      <div id="vnAudioNotice" class="speechStatus" style="margin-top:14px" aria-live="polite"></div>
     </div>
   </section>
 
@@ -383,6 +411,52 @@ body.language-mode .languageBack{display:block}
       <div class="card"><div class="stat" id="vnScoreProgress">0%</div><div class="small">Quiz da Aula 1</div></div>
       <div class="card"><div class="stat" id="vnLessonStatus">Não concluída</div><div class="small">Aula 1</div></div>
       <div class="card"><div class="stat" id="vnLearnedCount">0/29</div><div class="small">Letras dominadas (🟢)</div></div>
+    </div>
+  </section>
+
+  <!-- CURSO DE CHINÊS (MANDARIM) -->
+  <section id="zh-home" class="page lesson">
+    <div class="top"><div><h1>Aprendendo Chinês (Mandarim) 🇨🇳</h1><div class="muted">V11.0 — sua trilha de mandarim</div></div><div class="progressBox"><div class="small">Progresso inicial</div><div class="progress"><div class="bar" id="zhTopBar"></div></div><div class="small" id="zhTopPct">0%</div></div></div>
+    <div class="hero"><span class="tag">CURSO INICIAL</span><h2>Comece pelo mandarim</h2><p class="muted">Vamos começar com pinyin, os quatro tons e expressões simples. O conteúdo será desenvolvido gradualmente.</p><div class="actions"><button class="btn" onclick="showPage('zh-aulas')">Ver aulas →</button></div></div>
+    <div class="grid"><div class="card"><div class="stat">4</div><div class="small">Tons principais</div></div><div class="card"><div class="stat">拼音</div><div class="small">Pinyin: apoio de pronúncia</div></div></div>
+  </section>
+  <section id="zh-aulas" class="page lesson"><div class="hero"><span class="tag">TRILHA DE APRENDIZADO</span><h2>Aulas de mandarim 🇨🇳</h2><p class="muted">Aula 1 disponível como introdução; as próximas serão construídas por etapas.</p></div><div class="grid"><div class="card lessonCard"><span class="lessonStatus">🟢 DISPONÍVEL</span><h3>Aula 1 — Primeiros sons e tons</h3><p>Conheça expressões iniciais, o pinyin e a importância dos tons.</p><div class="actions"><button class="btn" onclick="showPage('zh-aula1')">Abrir Aula 1 →</button></div></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 2 — Pinyin</h3><p>Iniciais, finais e combinações de sons.</p><button class="btn secondary" disabled>Em breve</button></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 3 — Tons e palavras</h3><p>Reconhecer diferenças de tom em palavras úteis.</p><button class="btn secondary" disabled>Em breve</button></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 4 — Primeiras frases</h3><p>Montar expressões curtas do cotidiano.</p><button class="btn secondary" disabled>Em breve</button></div></div></section>
+  <section id="zh-aula1" class="page lesson"><div class="hero"><span class="tag">AULA 1</span><h2>Primeiros sons e tons</h2><p class="muted">Em mandarim, o tom pode mudar o significado. Ouça cada expressão com uma voz em chinês quando disponível.</p></div><div class="card"><h3>Expressões iniciais</h3><div class="word"><span><b>你好</b><br><span class="small">nǐ hǎo — olá</span></span><button class="audioBtn" onclick="speakOther('chinese','你好',this)">🔊 Ouvir</button></div><div class="word"><span><b>谢谢</b><br><span class="small">xièxie — obrigado(a)</span></span><button class="audioBtn" onclick="speakOther('chinese','谢谢',this)">🔊 Ouvir</button></div><div class="word"><span><b>再见</b><br><span class="small">zàijiàn — tchau</span></span><button class="audioBtn" onclick="speakOther('chinese','再见',this)">🔊 Ouvir</button></div><p class="muted">Esta é uma base inicial. As próximas atualizações vão ampliar explicações, exercícios e prática guiada.</p></div></section>
+  <section id="zh-pratica" class="page lesson">
+    <div class="hero"><span class="tag">PRÁTICA</span><h2>Prática de Escrita ✍️</h2><p class="muted">Escolha um caractere ou expressão em mandarim, observe o modelo e pratique desenhando por cima. Os traços são uma orientação visual; a ordem dos traços será ensinada nas próximas aulas.</p></div>
+    <div class="card"><div class="drawContainer">
+      <div class="drawTools"><label for="zhDrawSelect"><strong>Praticar:</strong></label><select class="charSelect" id="zhDrawSelect" onchange="updateGuidedCanvas('zh')"><option value="你">你 (nǐ)</option><option value="好">好 (hǎo)</option><option value="你好">你好 (nǐ hǎo)</option><option value="谢">谢 (xiè)</option><option value="谢谢">谢谢 (xiè xie)</option><option value="再见">再见 (zài jiàn)</option></select><button class="btn secondary" onclick="speakOther('chinese',document.getElementById('zhDrawSelect').value)">🔊 Ouvir</button><button class="btn secondary" onclick="clearGuidedCanvas('zh')">🧼 Limpar</button><button class="btn green" onclick="checkGuidedCanvas('zh')">✅ Verificar</button></div>
+      <canvas id="zhDrawCanvas" width="360" height="280" aria-label="Área para praticar a escrita chinesa"></canvas><div class="feedback" id="zhDrawFeedback" style="font-size:16px;text-align:center"></div>
+    </div></div>
+    <div class="card" style="margin-top:16px"><h3>Expressões para copiar</h3><div class="word"><span><b>你好</b> — olá</span><button class="audioBtn" onclick="setGuidedTarget('zh','你好')">✍️ Praticar</button></div><div class="word"><span><b>谢谢</b> — obrigado(a)</span><button class="audioBtn" onclick="setGuidedTarget('zh','谢谢')">✍️ Praticar</button></div><div class="word"><span><b>再见</b> — tchau</span><button class="audioBtn" onclick="setGuidedTarget('zh','再见')">✍️ Praticar</button></div></div>
+  </section>
+  <section id="zh-fala" class="page lesson"><div class="hero"><span class="tag">PRÁTICA DE FALA</span><h2>Fale em mandarim 🎙️</h2><p class="muted">Ouça a frase, repita e use o reconhecimento de fala do navegador, se houver suporte ao mandarim.</p></div><div class="card speechPracticeCard"><div class="speechPracticeTarget"><span class="speechLabel">FRASE-ALVO</span><strong id="zhSpeechTarget">你好</strong><span id="zhSpeechMeaning" class="muted">Olá.</span></div><div class="speechPracticeControls"><button class="btn secondary" onclick="speakOther('chinese',document.getElementById('zhSpeechTarget').textContent)">🔊 Ouvir</button><button class="btn green" id="zhSpeechStartBtn" onclick="startSpeechPractice('zh')">🎙️ Falar agora</button><button class="btn secondary" onclick="nextOtherSpeech('zh')">➡️ Próxima</button></div><div id="zhSpeechStatus" class="speechStatus">Clique em “Falar agora” e diga a frase-alvo.</div><div id="zhSpeechResult" class="speechResult"></div></div></section>
+  <section id="zh-vocab" class="page lesson"><div class="hero"><h2>Vocabulário inicial</h2><p class="muted">Três expressões para começar.</p></div><div class="card"><div class="word"><span><b>你好</b><br><span class="small">Olá</span></span><button class="audioBtn" onclick="speakOther('chinese','你好',this)">🔊 Ouvir</button></div><div class="word"><span><b>谢谢</b><br><span class="small">Obrigado(a)</span></span><button class="audioBtn" onclick="speakOther('chinese','谢谢',this)">🔊 Ouvir</button></div><div class="word"><span><b>再见</b><br><span class="small">Tchau</span></span><button class="audioBtn" onclick="speakOther('chinese','再见',this)">🔊 Ouvir</button></div></div></section>
+  <section id="zh-progresso" class="page lesson"><div class="hero"><h2>Seu progresso 🇨🇳</h2><p class="muted">O acompanhamento detalhado será adicionado conforme o curso ganhar exercícios e atividades.</p></div><div class="card"><div class="stat" id="zhProgressStat">0%</div><div class="small">Curso introdutório</div></div></section>
+
+  <!-- CURSO DE TAILANDÊS -->
+  <section id="th-home" class="page lesson"><div class="top"><div><h1>Aprendendo Tailandês 🇹🇭</h1><div class="muted">V11.0 — sua trilha de tailandês</div></div><div class="progressBox"><div class="small">Progresso inicial</div><div class="progress"><div class="bar" id="thTopBar"></div></div><div class="small" id="thTopPct">0%</div></div></div><div class="hero"><span class="tag">CURSO INICIAL</span><h2>Comece pelos sons do tailandês</h2><p class="muted">Vamos começar com expressões simples e os sons da língua. A escrita e os tons serão trabalhados progressivamente.</p><div class="actions"><button class="btn" onclick="showPage('th-aulas')">Ver aulas →</button></div></div><div class="grid"><div class="card"><div class="stat">ไทย</div><div class="small">Sistema de escrita</div></div><div class="card"><div class="stat">5</div><div class="small">Tons lexicais</div></div></div></section>
+  <section id="th-aulas" class="page lesson"><div class="hero"><span class="tag">TRILHA DE APRENDIZADO</span><h2>Aulas de tailandês 🇹🇭</h2><p class="muted">Aula 1 disponível como introdução; as próximas serão construídas por etapas.</p></div><div class="grid"><div class="card lessonCard"><span class="lessonStatus">🟢 DISPONÍVEL</span><h3>Aula 1 — Primeiras expressões</h3><p>Conheça cumprimentos simples e comece a ouvir os sons do tailandês.</p><div class="actions"><button class="btn" onclick="showPage('th-aula1')">Abrir Aula 1 →</button></div></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 2 — Sons e tons</h3><p>Introdução à pronúncia e aos tons.</p><button class="btn secondary" disabled>Em breve</button></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 3 — Escrita tailandesa</h3><p>Primeiras consoantes e vogais.</p><button class="btn secondary" disabled>Em breve</button></div><div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 4 — Primeiras frases</h3><p>Expressões curtas do cotidiano.</p><button class="btn secondary" disabled>Em breve</button></div></div></section>
+  <section id="th-aula1" class="page lesson"><div class="hero"><span class="tag">AULA 1</span><h2>Primeiras expressões</h2><p class="muted">Ouça as expressões em tailandês e repita com calma.</p></div><div class="card"><div class="word"><span><b>สวัสดี</b><br><span class="small">sawatdee — olá</span></span><button class="audioBtn" onclick="speakOther('thai','สวัสดี',this)">🔊 Ouvir</button></div><div class="word"><span><b>ขอบคุณ</b><br><span class="small">khop khun — obrigado(a)</span></span><button class="audioBtn" onclick="speakOther('thai','ขอบคุณ',this)">🔊 Ouvir</button></div><div class="word"><span><b>ลาก่อน</b><br><span class="small">la kon — tchau</span></span><button class="audioBtn" onclick="speakOther('thai','ลาก่อน',this)">🔊 Ouvir</button></div></div></section>
+  <section id="th-pratica" class="page lesson">
+    <div class="hero"><span class="tag">PRÁTICA</span><h2>Prática de Escrita ✍️</h2><p class="muted">O tailandês usa um sistema próprio de escrita. Escolha uma letra ou palavra, observe o modelo e pratique desenhando por cima. A ordem oficial dos traços será trabalhada nas próximas aulas.</p></div>
+    <div class="card"><div class="drawContainer">
+      <div class="drawTools"><label for="thDrawSelect"><strong>Praticar:</strong></label><select class="charSelect" id="thDrawSelect" onchange="updateGuidedCanvas('th')"><option value="ส">ส (s)</option><option value="ว">ว (w)</option><option value="ด">ด (d)</option><option value="ข">ข (kh)</option><option value="ค">ค (kh)</option><option value="สวัสดี">สวัสดี (olá)</option><option value="ขอบคุณ">ขอบคุณ (obrigado/a)</option><option value="ลาก่อน">ลาก่อน (tchau)</option></select><button class="btn secondary" onclick="speakOther('thai',document.getElementById('thDrawSelect').value)">🔊 Ouvir</button><button class="btn secondary" onclick="clearGuidedCanvas('th')">🧼 Limpar</button><button class="btn green" onclick="checkGuidedCanvas('th')">✅ Verificar</button></div>
+      <canvas id="thDrawCanvas" width="360" height="280" aria-label="Área para praticar a escrita tailandesa"></canvas><div class="feedback" id="thDrawFeedback" style="font-size:16px;text-align:center"></div>
+    </div></div>
+    <div class="card" style="margin-top:16px"><h3>Palavras para copiar</h3><div class="word"><span><b>สวัสดี</b> — olá</span><button class="audioBtn" onclick="setGuidedTarget('th','สวัสดี')">✍️ Praticar</button></div><div class="word"><span><b>ขอบคุณ</b> — obrigado(a)</span><button class="audioBtn" onclick="setGuidedTarget('th','ขอบคุณ')">✍️ Praticar</button></div><div class="word"><span><b>ลาก่อน</b> — tchau</span><button class="audioBtn" onclick="setGuidedTarget('th','ลาก่อน')">✍️ Praticar</button></div></div>
+  </section>
+  <section id="th-fala" class="page lesson"><div class="hero"><span class="tag">PRÁTICA DE FALA</span><h2>Fale em tailandês 🎙️</h2><p class="muted">Ouça a frase, repita e use o reconhecimento de fala do navegador, se houver suporte ao tailandês.</p></div><div class="card speechPracticeCard"><div class="speechPracticeTarget"><span class="speechLabel">FRASE-ALVO</span><strong id="thSpeechTarget">สวัสดี</strong><span id="thSpeechMeaning" class="muted">Olá.</span></div><div class="speechPracticeControls"><button class="btn secondary" onclick="speakOther('thai',document.getElementById('thSpeechTarget').textContent)">🔊 Ouvir</button><button class="btn green" id="thSpeechStartBtn" onclick="startSpeechPractice('th')">🎙️ Falar agora</button><button class="btn secondary" onclick="nextOtherSpeech('th')">➡️ Próxima</button></div><div id="thSpeechStatus" class="speechStatus">Clique em “Falar agora” e diga a frase-alvo.</div><div id="thSpeechResult" class="speechResult"></div></div></section>
+  <section id="th-vocab" class="page lesson"><div class="hero"><h2>Vocabulário inicial</h2><p class="muted">Três expressões para começar.</p></div><div class="card"><div class="word"><span><b>สวัสดี</b><br><span class="small">Olá</span></span><button class="audioBtn" onclick="speakOther('thai','สวัสดี',this)">🔊 Ouvir</button></div><div class="word"><span><b>ขอบคุณ</b><br><span class="small">Obrigado(a)</span></span><button class="audioBtn" onclick="speakOther('thai','ขอบคุณ',this)">🔊 Ouvir</button></div><div class="word"><span><b>ลาก่อน</b><br><span class="small">Tchau</span></span><button class="audioBtn" onclick="speakOther('thai','ลาก่อน',this)">🔊 Ouvir</button></div></div></section>
+  <section id="th-progresso" class="page lesson"><div class="hero"><h2>Seu progresso 🇹🇭</h2><p class="muted">O acompanhamento detalhado será adicionado conforme o curso ganhar exercícios e atividades.</p></div><div class="card"><div class="stat" id="thProgressStat">0%</div><div class="small">Curso introdutório</div></div></section>
+
+  <section id="aulas" class="page lesson">
+    <div class="hero"><span class="tag">TRILHA DE APRENDIZADO</span><h2>Suas aulas de japonês 🇯🇵</h2><p class="muted">Escolha uma aula para continuar. A Aula 1 já está disponível; as próximas serão liberadas conforme o curso for desenvolvido.</p></div>
+    <div class="grid">
+      <div class="card lessonCard"><span class="lessonStatus">🟢 DISPONÍVEL</span><h3>Aula 1 — Os primeiros sons</h3><p>Conheça as vogais japonesas, os primeiros hiragana e as bases para começar a reconhecer palavras.</p><div class="actions"><button class="btn" onclick="showPage('aula1')">Abrir Aula 1 →</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 2 — Primeiras combinações</h3><p>Próxima etapa: ampliar o reconhecimento dos sons e começar a formar combinações simples.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 3 — Palavras do dia a dia</h3><p>Avançar do reconhecimento dos sons para palavras úteis em situações cotidianas.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
+      <div class="card lessonCard locked"><span class="lessonStatus">🔒 EM PREPARAÇÃO</span><h3>Aula 4 — Primeiras frases</h3><p>Começar a juntar o que você aprendeu em expressões e frases curtas.</p><div class="actions"><button class="btn secondary" disabled type="button">Em breve</button></div></div>
     </div>
   </section>
 
@@ -877,19 +951,35 @@ function saveVNState(){
 }
 function getVietnameseVoice(){
   const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  const viVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('vi'));
-  return viVoices.find(v=>/vi-vn/i.test(v.lang)) || viVoices[0] || null;
+  // Nunca selecione uma voz em português como substituta para o vietnamita.
+  return voices.find(v=>/^vi(-|_)?vn$/i.test(v.lang || '')) || voices.find(v=>(v.lang || '').toLowerCase().startsWith('vi')) || null;
+}
+function showVNVoiceNotice(message){
+  const notice=document.getElementById('vnAudioNotice');
+  const status=document.getElementById('vnSpeechStatus');
+  if(notice) notice.textContent=message;
+  if(status) status.textContent=message;
 }
 function speakVN(text, button){
-  if(!('speechSynthesis' in window)) return;
+  if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance==='undefined'){
+    showVNVoiceNotice('⚠️ Este navegador não oferece reprodução de voz compatível. Vamos usar áudios gravados quando o pacote de pronúncia estiver integrado.');
+    return;
+  }
+  const voice=getVietnameseVoice();
+  // Não reproduzir com a voz padrão do aparelho: em aparelhos sem voz vietnamita ela pode soar como português.
+  if(!voice){
+    showVNVoiceNotice('ℹ️ Não encontrei uma voz vietnamita instalada neste navegador. Para não pronunciar como português, o áudio foi pausado. A próxima etapa é integrar gravações nativas para as letras e palavras.');
+    return;
+  }
   window.speechSynthesis.cancel();
-  window.speechSynthesis.getVoices();
-  const utter = new SpeechSynthesisUtterance(text);
-  const voice = getVietnameseVoice();
-  if(voice){ utter.voice=voice; utter.lang=voice.lang; }
-  else utter.lang='vi-VN';
-  utter.rate = speechRate;
-  utter.pitch = 1;
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.lang=voice.lang || 'vi-VN';
+  utter.voice=voice;
+  utter.rate=speechRate;
+  utter.pitch=1;
+  utter.onerror=()=>showVNVoiceNotice('⚠️ O navegador não conseguiu reproduzir a voz vietnamita. Vamos usar gravações nativas quando o pacote de áudio estiver integrado.');
+  if(button) button.setAttribute('aria-label','Ouvir pronúncia vietnamita');
+  showVNVoiceNotice('');
   window.speechSynthesis.speak(utter);
 }
 function cycleVNStatus(char,e){
@@ -977,21 +1067,27 @@ function finishVNLesson(){
   showPage('vn-progresso');
 }
 function selectLanguage(language){
+  const config={
+    japanese:{nav:'japaneseNav',home:'home',logo:'🇯🇵 Aprendendo Japonês',sub:'Seu curso, do zero ao anime.',title:'Aprendendo Japonês',subtitle:'V11.1 — progresso sincronizado na nuvem 🇯🇵',cls:''},
+    vietnamese:{nav:'vietnameseNav',home:'vn-home',logo:'🇻🇳 Aprendendo Vietnamita',sub:'Seu curso, focado em conversas reais.',title:'Aprendendo Vietnamita',subtitle:'V11.1 — trilha de vietnamita 🇻🇳',cls:'lang-vietnamese'},
+    chinese:{nav:'chineseNav',home:'zh-home',logo:'🇨🇳 Aprendendo Mandarim',sub:'Seu curso de mandarim, passo a passo.',title:'Aprendendo Chinês (Mandarim)',subtitle:'V11.1 — trilha de mandarim 🇨🇳',cls:''},
+    thai:{nav:'thaiNav',home:'th-home',logo:'🇹🇭 Aprendendo Tailandês',sub:'Seu curso de tailandês, passo a passo.',title:'Aprendendo Tailandês',subtitle:'V11.1 — trilha de tailandês 🇹🇭',cls:''}
+  };
+  const cfg=config[language] || config.japanese;
   document.body.classList.add('language-mode');
+  document.body.classList.toggle('lang-vietnamese',language==='vietnamese');
   try{ localStorage.setItem('idiomaSelecionado', language); }catch(e){}
   document.getElementById('languageSelector').classList.add('hidden');
-  const isVN=language==='vietnamese';
-  document.body.classList.toggle('lang-vietnamese',isVN);
-  document.getElementById('japaneseNav').style.display=isVN?'none':'block';
-  document.getElementById('vietnameseNav').style.display=isVN?'block':'none';
-  document.getElementById('courseLogo').textContent=isVN?'🇻🇳 Aprendendo Vietnamita':'🇯🇵 Aprendendo Japonês';
-  document.getElementById('courseSub').textContent=isVN?'Seu curso, focado em conversas reais.':'Seu curso, do zero ao anime.';
-  document.getElementById('homeTitle').textContent=isVN?'Aprendendo Vietnamita':'Aprendendo Japonês';
-  document.getElementById('homeSubtitle').textContent=isVN?'V9.0 — trilha de vietnamita 🇻🇳':'V9.0 — progresso sincronizado na nuvem 🇯🇵';
-  showPage(isVN?'vn-home':'home');
+  ['japaneseNav','vietnameseNav','chineseNav','thaiNav'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=id===cfg.nav?'block':'none';});
+  document.getElementById('courseLogo').textContent=cfg.logo;
+  document.getElementById('courseSub').textContent=cfg.sub;
+  document.getElementById('homeTitle').textContent=cfg.title;
+  document.getElementById('homeSubtitle').textContent=cfg.subtitle;
+  showPage(cfg.home);
 }
 function backToLanguages(){
   document.body.classList.remove('language-mode','lang-vietnamese');
+  ['japaneseNav','vietnameseNav','chineseNav','thaiNav'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   try{ localStorage.removeItem('idiomaSelecionado'); }catch(e){}
   document.getElementById('languageSelector').classList.remove('hidden');
 }
@@ -1000,7 +1096,8 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.style.display='none');
   const page=document.getElementById(id);
   if(page) page.style.display='block';
-  const activeNav = id.startsWith('vn-') ? document.getElementById('vietnameseNav') : document.getElementById('japaneseNav');
+  const navId = id.startsWith('vn-') ? 'vietnameseNav' : id.startsWith('zh-') ? 'chineseNav' : id.startsWith('th-') ? 'thaiNav' : 'japaneseNav';
+  const activeNav = document.getElementById(navId);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   activeNav?.querySelectorAll('button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1347,6 +1444,39 @@ function speakCurrentDrawChar() {
 }
 
 
+// Prática guiada de escrita para chinês e tailandês (independente do canvas japonês).
+const guidedCanvases = {};
+function initGuidedCanvas(kind){
+  const canvas=document.getElementById(kind+'DrawCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  guidedCanvases[kind]={canvas,ctx,drawing:false,hasDrawn:false,targetMask:null,points:0};
+  const pointFromEvent=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
+  const start=e=>{e.preventDefault();const p=pointFromEvent(e);const st=guidedCanvases[kind];st.drawing=true;st.hasDrawn=true;ctx.beginPath();ctx.moveTo(p.x,p.y);};
+  const move=e=>{const st=guidedCanvases[kind];if(!st.drawing)return;e.preventDefault();const p=pointFromEvent(e);ctx.lineWidth=12;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#60a5fa';ctx.lineTo(p.x,p.y);ctx.stroke();};
+  const stop=()=>{guidedCanvases[kind].drawing=false;ctx.beginPath();};
+  canvas.addEventListener('pointerdown',start);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);canvas.addEventListener('pointerleave',stop);
+  updateGuidedCanvas(kind);
+}
+function getGuidedFontSize(text){return text.length>3?74:text.length>2?88:text.length===2?112:170;}
+function updateGuidedCanvas(kind){
+  const st=guidedCanvases[kind];if(!st)return;
+  const text=document.getElementById(kind+'DrawSelect').value;const {canvas,ctx}=st;
+  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#05080d';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.font=`${getGuidedFontSize(text)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(203,213,225,0.28)';ctx.fillText(text,canvas.width/2,canvas.height/2);
+  const maskCanvas=document.createElement('canvas');maskCanvas.width=canvas.width;maskCanvas.height=canvas.height;const mctx=maskCanvas.getContext('2d');mctx.font=ctx.font;mctx.textAlign='center';mctx.textBaseline='middle';mctx.fillStyle='#fff';mctx.fillText(text,canvas.width/2,canvas.height/2);st.targetMask=mctx.getImageData(0,0,canvas.width,canvas.height).data;st.points=0;for(let i=0;i<st.targetMask.length;i+=4)if(st.targetMask[i]>100)st.points++;
+  st.hasDrawn=false;const fb=document.getElementById(kind+'DrawFeedback');if(fb)fb.textContent='';
+}
+function setGuidedTarget(kind,text){const select=document.getElementById(kind+'DrawSelect');if(!select)return;let option=[...select.options].find(o=>o.value===text);if(!option){option=document.createElement('option');option.value=text;option.textContent=text;select.appendChild(option);}select.value=text;updateGuidedCanvas(kind);document.getElementById(kind==='zh'?'zh-pratica':'th-pratica')?.scrollIntoView({behavior:'smooth',block:'start'});}
+function clearGuidedCanvas(kind){updateGuidedCanvas(kind);}
+function checkGuidedCanvas(kind){
+  const st=guidedCanvases[kind];if(!st)return;const fb=document.getElementById(kind+'DrawFeedback');
+  if(!st.hasDrawn){fb.style.color='#f87171';fb.textContent='⚠️ Desenhe por cima do modelo antes de verificar.';return;}
+  const data=st.ctx.getImageData(0,0,st.canvas.width,st.canvas.height).data;let user=0,overlap=0;
+  for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];if(b>150&&g>100&&b>r*1.15){user++;if(st.targetMask[i]>100)overlap++;}}
+  const ratio=overlap/(user||1);fb.style.color=ratio>.35?'#4ade80':'#fbbf24';fb.textContent=ratio>.35?'🎉 Bom trabalho! Seus traços acompanham o modelo. Continue praticando a forma e a ordem dos traços.':'✍️ Continue tentando seguir o modelo cinza. Dica: desenhe devagar e cubra mais partes dos caracteres.';
+}
+
 // =========================
 // V9 — PRÁTICA DE FALA
 // =========================
@@ -1365,23 +1495,59 @@ const vnSpeechData = [
   {text:'Tôi khỏe', meaning:'Estou bem.'},
   {text:'Xin lỗi', meaning:'Desculpa.'}
 ];
+const otherSpeechData={
+  zh:[{text:'你好',meaning:'Olá.'},{text:'谢谢',meaning:'Obrigado(a).'},{text:'再见',meaning:'Tchau.'}],
+  th:[{text:'สวัสดี',meaning:'Olá.'},{text:'ขอบคุณ',meaning:'Obrigado(a).'},{text:'ลาก่อน',meaning:'Tchau.'}]
+};
+let zhSpeechIndex=0, thSpeechIndex=0;
+function getVoiceForLanguage(code){
+  const voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+  const prefix=code==='chinese'?'zh':code==='thai'?'th':'vi';
+  const preferred=code==='chinese'?['zh-cn','zh-hans','zh']:code==='thai'?['th-th','th']:['vi-vn','vi'];
+  for(const tag of preferred){const v=voices.find(x=>(x.lang||'').toLowerCase()===tag);if(v)return v;}
+  return voices.find(v=>(v.lang||'').toLowerCase().startsWith(prefix))||null;
+}
+function speakOther(language,text,button){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter=new SpeechSynthesisUtterance(text);
+  const lang=language==='chinese'?'zh-CN':'th-TH';
+  const voice=getVoiceForLanguage(language);
+  utter.lang=lang;
+  if(voice) utter.voice=voice;
+  utter.rate=speechRate;
+  utter.pitch=1;
+  utter.onerror=()=>{const el=document.getElementById(language==='chinese'?'zhSpeechStatus':'thSpeechStatus');if(el)el.textContent='⚠️ Não foi possível reproduzir o áudio. Verifique se há uma voz desse idioma instalada no navegador/sistema.';};
+  const status=document.getElementById(language==='chinese'?'zhSpeechStatus':'thSpeechStatus');
+  if(!voice && status) status.textContent='ℹ️ Nenhuma voz nativa deste idioma foi encontrada. O navegador tentará usar o idioma configurado; para melhor pronúncia, ative uma voz correspondente no sistema.';
+  window.speechSynthesis.speak(utter);
+}
+function nextOtherSpeech(kind){
+  const data=otherSpeechData[kind];
+  if(!data)return;
+  if(kind==='zh')zhSpeechIndex=(zhSpeechIndex+1)%data.length;else thSpeechIndex=(thSpeechIndex+1)%data.length;
+  const item=data[kind==='zh'?zhSpeechIndex:thSpeechIndex];
+  document.getElementById(kind+'SpeechTarget').textContent=item.text;
+  document.getElementById(kind+'SpeechMeaning').textContent=item.meaning;
+  document.getElementById(kind+'SpeechResult').textContent='';
+  document.getElementById(kind+'SpeechStatus').textContent='Clique em “Falar agora” e diga a frase-alvo.';
+  speakOther(kind==='zh'?'chinese':'thai',item.text);
+}
+
 
 let jpSpeechIndex = 0;
 let vnSpeechIndex = 0;
 let activeRecognition = null;
 
 function normalizeSpeechText(text, language){
-  return String(text || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g,'')
-    .replace(/[.,!?¿¡「」『』。、？！]/g,'')
-    .replace(/\s+/g,' ')
-    .trim();
+  let value=String(text || '').toLowerCase().normalize('NFC');
+  // Preserve Vietnamese tone marks and Chinese/Thai script: they are meaningful, not decoration.
+  if(language==='vn' || language==='zh' || language==='th') return value.replace(/[.,!?¿¡「」『』。、？！]/g,'').replace(/\s+/g,' ').trim();
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?¿¡「」『』。、？！]/g,'').replace(/\s+/g,' ').trim();
 }
 
 function speechSimilarity(a,b){
-  const aa=normalizeSpeechText(a), bb=normalizeSpeechText(b);
+  const aa=normalizeSpeechText(a, window.__speechKind), bb=normalizeSpeechText(b, window.__speechKind);
   if(!aa || !bb) return 0;
   if(aa===bb) return 1;
   const max=Math.max(aa.length,bb.length), min=Math.min(aa.length,bb.length);
@@ -1408,10 +1574,11 @@ function renderSpeechTarget(kind){
 
 function startSpeechPractice(kind){
   const Recognition = getSpeechRecognition();
-  const status = document.getElementById(kind==='jp'?'jpSpeechStatus':'vnSpeechStatus');
-  const resultEl = document.getElementById(kind==='jp'?'jpSpeechResult':'vnSpeechResult');
-  const btn = document.getElementById(kind==='jp'?'jpSpeechStartBtn':'vnSpeechStartBtn');
-  const data = kind==='jp' ? jpSpeechData[jpSpeechIndex] : vnSpeechData[vnSpeechIndex];
+  const status = document.getElementById((kind==='jp'?'jp':kind==='vn'?'vn':kind)+'SpeechStatus');
+  const resultEl = document.getElementById((kind==='jp'?'jp':kind==='vn'?'vn':kind)+'SpeechResult');
+  const btn = document.getElementById((kind==='jp'?'jp':kind==='vn'?'vn':kind)+'SpeechStartBtn');
+  const data = kind==='jp' ? jpSpeechData[jpSpeechIndex] : kind==='vn' ? vnSpeechData[vnSpeechIndex] : otherSpeechData[kind][kind==='zh'?zhSpeechIndex:thSpeechIndex];
+  const idPrefix=kind==='jp'?'jp':kind==='vn'?'vn':kind;
 
   if(!Recognition){
     status.textContent='⚠️ Seu navegador não oferece reconhecimento de voz nesta versão. Tente usar Chrome no celular ou computador.';
@@ -1420,8 +1587,9 @@ function startSpeechPractice(kind){
 
   if(activeRecognition){ try{activeRecognition.stop();}catch(e){} }
   const recognition = new Recognition();
+  window.__speechKind=kind;
   activeRecognition = recognition;
-  recognition.lang = kind==='jp' ? 'ja-JP' : 'vi-VN';
+  recognition.lang = kind==='jp' ? 'ja-JP' : kind==='vn' ? 'vi-VN' : kind==='zh' ? 'zh-CN' : 'th-TH';
   recognition.interimResults = false;
   recognition.continuous = false;
   recognition.maxAlternatives = 3;
@@ -1469,6 +1637,8 @@ function startSpeechPractice(kind){
 
 function startJPSpeechPractice(){ startSpeechPractice('jp'); }
 function startVNSpeechPractice(){ startSpeechPractice('vn'); }
+function startZHSpeechPractice(){ startSpeechPractice('zh'); }
+function startTHSpeechPractice(){ startSpeechPractice('th'); }
 
 function speakJPSpeechTarget(){
   const data=jpSpeechData[jpSpeechIndex];
@@ -1490,7 +1660,7 @@ function nextVNSpeechTarget(){
 }
 
 if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=()=>{getJapaneseVoice();getVietnameseVoice();}; }
-renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); updateUI(); updateSpeedUI(); renderVNAlphabet(); renderVNQuiz(); updateVNUI(); renderSpeechTarget('jp'); renderSpeechTarget('vn');
+renderKanaTables(); renderQuiz(); renderKanaQuiz(); renderListenQuiz(); initCanvas(); initGuidedCanvas('zh'); initGuidedCanvas('th'); updateUI(); updateSpeedUI(); renderVNAlphabet(); renderVNQuiz(); updateVNUI(); renderSpeechTarget('jp'); renderSpeechTarget('vn');
 hydrateFromFirebase();
 </script>
 </body>
